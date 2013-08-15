@@ -1,8 +1,8 @@
 require 'digest'
 require 'zipruby' # gem 'zipruby'
 require 'ap' # gem 'awesome_print'
-require 'elastic_beanstalk/eb_config'
-require 'elastic_beanstalk/eb_extensions'
+require 'elastic/beanstalk/eb_config'
+require 'elastic/beanstalk/eb_extensions'
 
 namespace :eb do
 
@@ -228,7 +228,7 @@ namespace :eb do
   end
 
   def package_verbose?
-    EbConfig.package[:verbose]
+    EbConfig.package[:verbose] || false
   end
 
   def package_file

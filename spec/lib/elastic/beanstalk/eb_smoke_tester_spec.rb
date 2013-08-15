@@ -1,5 +1,5 @@
 require 'spec_helper'
-#require 'elastic_beanstalk/eb_smoke_tester'
+#require 'elastic/eb_smoke_tester'
 
 describe EbExtensions do
 
