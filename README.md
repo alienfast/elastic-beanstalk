@@ -65,6 +65,12 @@ This will take a while.  We intend to provide an example in the wiki and/or samp
 
 ## A real-world example
 
+Deploy version 1.1.3 of acme to production
+
+    $ RAILS_ENV=production rake eb:package eb:deploy[1.1.3]
+
+config/eb.yml
+
     # This is a sample that has not been executed so it may not be exactly 100%, but is intended to show
     #   that access to full options_settings and .ebextensions is intended.
     #---
