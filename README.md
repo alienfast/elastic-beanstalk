@@ -2,7 +2,7 @@
 
 Configure and deploy a rails app to Elastic Beanstalk via rake in 60 seconds.  Maintain multiple environment DRY configurations and .ebextensions in one easy to use configuration file.
 
-This gem simplifies configuration, and passes the heavy lifting to ThoughtWorksStudios/eb_deployer.
+This gem simplifies configuration, and passes the heavy lifting to the [eb_deployer](https://github.com/ThoughtWorksStudios/eb_deployer) from ThoughtWorksStudios.
 
 ## Installation
 
