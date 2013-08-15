@@ -1,0 +1,54 @@
+# http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/command-options.html#command-options-ruby
+---
+app: acme
+region: us-east-1
+solution_stack_name: 64bit Amazon Linux running Ruby 1.9.3
+package:
+  verbose: true
+  exclude_files: [resetdb.sh,  rspec.xml, README*, db/*.sqlite3]
+  exclude_dirs: [solr, features]
+#--
+ebextensions:
+  01settings.config:
+    # Run rake tasks before an application deployment
+    container_commands:
+      01seed:
+        command: rake db:seed
+        leader_only: true
+#---
+options:
+  aws:elasticbeanstalk:application:environment:
+    RAILS_ENV: foobar
+
+  aws:autoscaling:launchconfiguration:
+    InstanceType: foo
+    EC2KeyName: eb-ssh
+    SecurityGroups: 'acme-production-control'
+
+  aws:autoscaling:asg:
+    MinSize: 1
+    MaxSize: 5
+
+  aws:elb:loadbalancer:
+    SSLCertificateId: 'arn:aws:iam::XXXXXXX:server-certificate/acme'
+    LoadBalancerHTTPSPort: 443
+
+  aws:elb:policies:
+    Stickiness Policy: true
+
+  aws:elasticbeanstalk:sns:topics:
+    Notification Endpoint: 'alerts@acme.com'
+
+  aws:elasticbeanstalk:application:
+    Application Healthcheck URL: '/healthcheck'
+#---
+development:
+  strategy: inplace-update
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: t1.micro
+#---
+production:
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: t1.small
