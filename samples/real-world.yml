@@ -13,8 +13,6 @@ package:
 smoke_test: |
     lambda { |host|
 
-      require 'eb_smoke_tester'
-
       EbSmokeTester.test_url("http://#{host}/ping", 600, 5, 'All good! Everything is up and checks out.')
     }
 #--

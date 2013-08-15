@@ -18,6 +18,21 @@ Or install it yourself as:
 
     $ gem install elastic-beanstalk
 
+## Features
+
+### The elastic-beanstalk gem provides:
+* Rake tasks to simplify all interactions
+* Multi-environment configuration inheritance so your configs can be DRY
+* Full access to the range of configuration options provided by AWS Elastic Beanstalk
+* Keep all configurations including .ebextensions in one file (they are inheritable and can be overridden too)
+* Provide access to helpers such as the SmokeTester to simplify configurations
+
+### Plus
+Since [eb_deployer](https://github.com/ThoughtWorksStudios/eb_deployer) is doing the heavy lifting, by proxy you get access to great continuous delivery features such as:
+* Blue Green deployment strategy
+* In Place deployment strategy
+* Smoke Testing upon deployment before Blue Green DNS switching
+
 ## Usage
 
 Given an application named 'acme':
@@ -83,8 +98,6 @@ config/eb.yml
       exclude_files: [rspec.xml, README*, db/*.sqlite3]
     smoke_test: |
         lambda { |host|
-
-          require 'eb_smoke_tester'
 
           EbSmokeTester.test_url("http://#{host}/ping", 600, 5, 'All good! Everything is up and checks out.')
         }
