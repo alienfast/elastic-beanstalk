@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 describe EbConfig do
   # not sure why, but clear appears to unreliably run before each test.  Sometimes does, sometimes doesn't.
   #before do

@@ -6,7 +6,7 @@ module ElasticBeanstalk
     railtie_name :elastic_beanstalk
 
     rake_tasks do
-      load "tasks/lib/eb.rake"
+      load 'tasks/lib/eb.rake'
     end
   end
 end
