@@ -14,7 +14,8 @@ namespace :eb do
   task :config do |t, args|
 
     # set the default environment to be development
-    env = Rails.env || 'development'
+    #env = ENV['RAILS_ENV'] || Rails.env || 'development'
+    env = ENV['RAILS_ENV'] || 'development'
 
     # load the configuration
     EbConfig.load!(env)
@@ -39,6 +40,9 @@ namespace :eb do
   #
   desc 'Show resolved configuration without doing anything.'
   task :show_config, [:version] => [:config] do |t, args|
+
+
+    puts "Working Directory: #{Rake.original_dir}"
 
     resolve_version(args)
     print_config
@@ -232,14 +236,14 @@ namespace :eb do
   end
 
   def aws_secrets_file
-    "#{Dir.home}/.aws.#{EbConfig.app}.yml"
+    File.expand_path("~/.aws.#{EbConfig.app}.yml")
   end
 
   def absolute_package_file
     filename = package_file()
     unless filename.start_with? '/'
       filename = filename.gsub('[', '').gsub(']', '')
-      filename = Rails.root.join(filename)
+      filename = EbConfig.resolve_path(filename)
     end
     filename
   end

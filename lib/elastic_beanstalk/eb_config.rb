@@ -40,7 +40,7 @@ module ElasticBeanstalk
     # a name of the file to read as it's argument. We can also pass in some
     # options, but at the moment it's being used to allow per-environment
     # overrides in Rails
-    def load!(environment = nil, filename = Rails.root.join('config/eb.yml'))
+    def load!(environment = nil, filename = resolve_path('config/eb.yml'))
 
       # merge all top level settings with the defaults set in the #init
       #@configuration.deep_merge!( YAML::load_file(filename).deep_symbolize )
@@ -162,6 +162,23 @@ module ElasticBeanstalk
       }
     end
 
+    def resolve_path(relative_path)
+      if defined?(Rails)
+
+        puts '**********************Using Rails.root'
+        Rails.root.join(relative_path)
+      elsif defined?(Rake.original_dir)
+
+        puts '**********************Using Rake.original_dir'
+        Rake.original_dir.join(relative_path)
+      else
+
+        puts '**********************Using Last resort Dir.pwd'
+        #raise 'I have no idea what the root dir is yet.'
+        File.expand_path(relative_path, Dir.pwd)
+      end
+    end
+
 
     #def environment
     #  @configuration[:environment]
@@ -182,4 +199,5 @@ module ElasticBeanstalk
     #  end
     #end
   end
+
 end

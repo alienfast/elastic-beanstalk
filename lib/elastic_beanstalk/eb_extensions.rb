@@ -33,11 +33,11 @@ module ElasticBeanstalk
     end
 
     def absolute_file_name(filename)
-      Rails.root.join(".ebextensions/#{filename}")
+      EbConfig.resolve_path(".ebextensions/#{filename}")
     end
 
     def ebextensions_dir(filename)
-      Rails.root.join(".ebextensions/#{filename}")
+      EbConfig.resolve_path(".ebextensions/#{filename}")
     end
   end
 end
