@@ -10,7 +10,7 @@ namespace :eb do
   #
   #
   #
-  desc 'Setup configuration for elastic beanstalk'
+  desc 'Setup AWS.config and merge/override environments into one resolved configuration'
   task :config do |t, args|
 
     # set the default environment to be development
@@ -48,6 +48,7 @@ namespace :eb do
   #
   #
   #
+  desc 'Remove any generated package.'
   task :clobber do |t, args|
     # kill the old package dir
     rm_r EbConfig.package[:dir] rescue nil
@@ -60,7 +61,7 @@ namespace :eb do
   #   root of the archive, not under a top level folder.  Include this package task to make
   #   sure we don't need to learn about this again through long deploy cycles!
   #
-  desc 'Package for elastic beanstalk'
+  desc 'Package zip source bundle for Elastic Beanstalk'
   task :package => [:clobber, :config] do |t, args|
 
     begin
@@ -109,7 +110,7 @@ namespace :eb do
   #
   #
   #
-  desc 'Deploy to elastic beanstalk'
+  desc 'Deploy to Elastic Beanstalk'
   task :deploy, [:version] => [:config] do |t, args|
     # Leave off the dependency of :package, we need to package this in the build phase and save
     #   the artifact on bamboo. The deploy plan will handle this separately.
@@ -154,7 +155,7 @@ namespace :eb do
   #
   #
   #
-  desc '** Warning: Destroy elastic beanstalk application and *all* environments.'
+  desc '** Warning: Destroy Elastic Beanstalk application and *all* environments.'
   task :destroy, [:force] do |t, args|
 
     if args[:force].eql? 'y'
