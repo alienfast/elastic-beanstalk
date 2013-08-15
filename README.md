@@ -56,12 +56,12 @@ This will take a while.  We intend to provide an example in the wiki and/or samp
 
 ## Rake Tasks
 
-    eb:config       # Setup AWS.config and merge/override environments into one resolved configuration.
-    eb:show_config  # Show resolved configuration without doing anything. arguments[:version]
-    eb:clobber      # Remove any generated package.
-    eb:package      # Package zip source bundle for Elastic Beanstalk.
-    eb:deploy       # Deploy to Elastic Beanstalk. arguments[:version]
-    eb:destroy      # ** Warning: Destroy Elastic Beanstalk application and *all* environments. arguments[:force]
+    rake eb:clobber                 # Remove any generated package
+    rake eb:config                  # Setup AWS.config and merge/override environments into one resolved configuration
+    rake eb:deploy[version]         # Deploy to Elastic Beanstalk
+    rake eb:destroy[force]          # ** Warning: Destroy Elastic Beanstalk application and *all* environments
+    rake eb:package                 # Package zip source bundle for Elastic Beanstalk
+    rake eb:show_config[version]    # Show resolved configuration without doing anything
 
 ## A real-world example
 

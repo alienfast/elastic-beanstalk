@@ -1,8 +1,9 @@
 require 'digest'
 require 'zipruby' # gem 'zipruby'
 require 'ap' # gem 'awesome_print'
-require 'elastic/beanstalk/eb_config'
-require 'elastic/beanstalk/eb_extensions'
+require 'eb_deployer'
+require 'elastic/beanstalk/config'
+require 'elastic/beanstalk/extensions'
 
 namespace :eb do
 

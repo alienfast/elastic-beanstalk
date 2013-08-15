@@ -12,7 +12,7 @@ module Elastic
 #   something is screwy, see the defaults in the #init as those add some default array values.
 #   If this behavior of merging arrays or the defaults are somehow un-sensible, file an issue and we'll revisit it.
 #
-    module EbConfig
+    module Config
       # it's a singleton, thus implemented as a self-extended module
       extend self
 
@@ -166,15 +166,15 @@ module Elastic
       def resolve_path(relative_path)
         if defined?(Rails)
 
-          puts '**********************Using Rails.root'
+          #puts '**********************Using Rails.root'
           Rails.root.join(relative_path)
         elsif defined?(Rake.original_dir)
 
-          puts '**********************Using Rake.original_dir'
+          #puts '**********************Using Rake.original_dir'
           Rake.original_dir.join(relative_path)
         else
 
-          puts '**********************Using Last resort Dir.pwd'
+          #puts '**********************Using Last resort Dir.pwd'
           #raise 'I have no idea what the root dir is yet.'
           File.expand_path(relative_path, Dir.pwd)
         end

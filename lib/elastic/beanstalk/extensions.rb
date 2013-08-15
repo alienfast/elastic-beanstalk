@@ -1,7 +1,7 @@
 module Elastic
   module Beanstalk
 
-    module EbExtensions
+    module Extensions
       # it's a singleton, thus implemented as a self-extended module
       extend self
 

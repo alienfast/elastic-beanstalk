@@ -2,7 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 
 # our gem
-require 'elastic_beanstalk'
+require 'elastic/beanstalk'
 
 RSpec.configure do |config|
 end
