@@ -37,7 +37,7 @@ describe EbConfig do
     sleep 1
     #expect(EbConfig.strategy).to be_nil
 
-    EbConfig.load!(nil, Rails.root.join('spec/lib/eb_spec.yml'))
+    EbConfig.load!(nil, config_file_path)
     assert_common_top_level_settings()
     assert_option 'InstanceType', 'foo'
     #expect(EbConfig.strategy).to be_nil
@@ -46,7 +46,7 @@ describe EbConfig do
 
   it 'should read file and override with development environment' do
     EbConfig.clear
-    EbConfig.load!(:development, Rails.root.join('spec/lib/eb_spec.yml'))
+    EbConfig.load!(:development, config_file_path)
     assert_option 'InstanceType', 't1.micro'
     expect(EbConfig.strategy).to eql 'inplace-update'
     expect(EbConfig.environment).to eql 'development'
@@ -54,7 +54,7 @@ describe EbConfig do
 
   it 'should read file and override with production environment' do
     EbConfig.clear
-    EbConfig.load!(:production, Rails.root.join('spec/lib/eb_spec.yml'))
+    EbConfig.load!(:production, config_file_path)
     assert_option 'InstanceType', 't1.small'
     expect(EbConfig.environment).to eql 'production'
   end
@@ -95,5 +95,9 @@ describe EbConfig do
     assert_option 'Stickiness Policy', 'true'
     assert_option 'Notification Endpoint', 'alerts@acme.com'
     assert_option 'Application Healthcheck URL', '/healthcheck'
+  end
+
+  def config_file_path
+    File.expand_path('../eb_spec.yml', __FILE__)
   end
 end

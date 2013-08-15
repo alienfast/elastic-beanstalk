@@ -5,5 +5,4 @@ require 'bundler/setup'
 require 'elastic_beanstalk'
 
 RSpec.configure do |config|
-
 end

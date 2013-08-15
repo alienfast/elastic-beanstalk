@@ -1,4 +1,5 @@
 require 'deep_symbolize'
+require 'yaml'
 
 module ElasticBeanstalk
 #
