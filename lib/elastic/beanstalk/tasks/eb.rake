@@ -105,6 +105,14 @@ namespace :eb do
           end
         end
       end
+
+
+      # write Rakefile for external CI/CD package deployment
+      File.open(package_rakefile, "w+") do |f|
+        f.write("spec = Gem::Specification.find_by_name('elastic-beanstalk', '#{Elastic::Beanstalk::VERSION}')\n")
+        f.write("load \"\#{spec.gem_dir}/lib/elastic/beanstalk/tasks/eb.rake\"")
+      end
+
       puts "\nFinished creating archive (#{package_file})."
     ensure
       EbExtensions.delete_extensions
@@ -246,6 +254,10 @@ namespace :eb do
 
   def package_file
     "#{EbConfig.package[:dir]}/#{EbConfig.app}.zip"
+  end
+
+  def package_rakefile
+    "#{EbConfig.package[:dir]}/Rakefile"
   end
 
   def aws_secrets_file
