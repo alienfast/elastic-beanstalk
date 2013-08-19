@@ -29,8 +29,8 @@ namespace :eb do
     # resolve the version and set the APP_VERSION environment variable
     resolve_version(args)
 
-    # configure aws credentials
-    AWS.config(credentials)
+    # configure aws credentials.  Depending on the called task, this may not be necessary parent task should call #credentials! for validation.
+    AWS.config(credentials) unless @credentials.nil?
 
     # configure aws region if specified in the eb.yml
     AWS.config(region: EbConfig.region) unless EbConfig.region.nil?
@@ -121,6 +121,9 @@ namespace :eb do
     # Leave off the dependency of :package, we need to package this in the build phase and save
     #   the artifact on bamboo. The deploy plan will handle this separately.
     from_time = Time.now
+
+    # ensure credentials
+    credentials!
 
     # check package file
     raise "Package file not found (#{absolute_package_file}).  Be sure to run the :package task subsequent to any :deploy attempts." if !File.exists? absolute_package_file
@@ -219,11 +222,19 @@ namespace :eb do
     puts "Destroy issued to AWS."
   end
 
+  # validate file exists
+  def credentials!
+    raise "\nFailed to load AWS secrets: #{aws_secrets_file}.\nFile contents should look like:\naccess_key_id: XXXX\nsecret_access_key: XXXX\n\n" unless File.exists?(aws_secrets_file)
+    credentials
+
+    ['access_key_id', 'secret_access_key'].each do |key|
+      value = credentials[key]
+      raise "\nThe #{key} must be specified in the #{aws_secrets_file}.\n\n" if value.nil?
+    end
+  end
+
   # load from a user directory i.e. ~/.aws.acme.yml
   def credentials
-
-    raise "Failed to load AWS secrets: #{aws_secrets_file}.\nFile contents should look like:\naccess_key_id: XXXX\nsecret_access_key: XXXX" unless File.exists?(aws_secrets_file)
-
     # load secrets from the user home directory
     @credentials = YAML.safe_load_file(aws_secrets_file) if @credentials.nil?
     @credentials
