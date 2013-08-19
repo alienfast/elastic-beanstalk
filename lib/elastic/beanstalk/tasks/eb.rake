@@ -67,7 +67,7 @@ namespace :eb do
   #   root of the archive, not under a top level folder.  Include this package task to make
   #   sure we don't need to learn about this again through long deploy cycles!
   #
-  desc 'Package zip source bundle for Elastic Beanstalk'
+  desc 'Package zip source bundle for Elastic Beanstalk and generate external Rakefile'
   task :package => [:clobber, :config] do |t, args|
 
     begin
