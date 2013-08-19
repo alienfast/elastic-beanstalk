@@ -1,5 +1,4 @@
 require 'spec_helper'
-#require 'elastic/eb_smoke_tester'
 
 describe EbExtensions do
 

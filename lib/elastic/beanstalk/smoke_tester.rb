@@ -1,3 +1,6 @@
+require 'timeout'
+require 'net/http'
+
 module Elastic
   module Beanstalk
 
@@ -19,7 +22,9 @@ module Elastic
               i += 1
               begin
                 response = Net::HTTP.get_response(URI(url))
-              rescue SocketError => e
+              #rescue SocketError => e
+              #  response = ResponseStub.new({code: e.message, body: ''})
+              rescue => e
                 response = ResponseStub.new({code: e.message, body: ''})
               end
 
