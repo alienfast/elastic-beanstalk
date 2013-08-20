@@ -5,6 +5,7 @@ require 'eb_deployer'
 require 'time_diff'
 require 'elastic/beanstalk/config'
 require 'elastic/beanstalk/extensions'
+require 'yaml'
 
 namespace :eb do
 

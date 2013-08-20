@@ -1,0 +1,5 @@
+# rakefile for external binstubs execution
+gem_dir = File.expand_path('..',File.dirname(__FILE__))
+
+# load the rake tasks
+load "#{gem_dir}/lib/elastic/beanstalk/tasks/eb.rake"
