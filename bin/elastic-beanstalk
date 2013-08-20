@@ -28,12 +28,17 @@
 #   elastic-beanstalk some-task[args]
 #
 
-gem 'elastic-beanstalk'
+#gem 'elastic-beanstalk'
 
 gem_dir = File.expand_path('..',File.dirname(__FILE__))
 $LOAD_PATH.unshift gem_dir# Look in gem directory for resources first.
 
-require 'elastic-beanstalk'
+lib = File.expand_path('lib', gem_dir)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+
+#require 'elastic-beanstalk'
+require 'elastic/beanstalk'
 require 'rake'
 require 'pp'
 

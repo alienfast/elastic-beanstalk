@@ -1,0 +1,49 @@
+# test only! REMOVE THIS FILE!
+
+#---
+app: acme
+region: us-east-1
+solution_stack_name: 64bit Amazon Linux running Ruby 1.9.3
+package:
+  #verbose: true
+  exclude_dirs: [solr, features] # additional dirs that merge with default excludes
+  exclude_files: [resetdb.sh,  rspec.xml, README*, db/*.sqlite3]
+smoke_test: |
+    lambda { |host|
+
+      # bad text is: 'Oh no! What happened!?'
+      EbSmokeTester.test_url("http://#{host}/ping", 600, 5, 'You came to this page by mistake, go back where you came from')
+    }
+#--
+ebextensions:
+  01settings.config:
+    # Run rake tasks before an application deployment
+    container_commands:
+      01seed:
+        command: rake db:seed
+        leader_only: true
+  # run any necessary commands
+  02commands.config:
+    container_commands:
+      01timezone:
+        command: "ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime"
+
+#---
+options:
+  aws:autoscaling:launchconfiguration:
+    EC2KeyName: eb-ssh
+
+#---
+development:
+  strategy: inplace_update
+  options:
+    aws:autoscaling:launchconfiguration:
+#      InstanceType: t1.micro
+      InstanceType: m1.small
+    aws:elasticbeanstalk:application:environment:
+      RAILS_SKIP_ASSET_COMPILATION: true
+#---
+production:
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: c1.medium
