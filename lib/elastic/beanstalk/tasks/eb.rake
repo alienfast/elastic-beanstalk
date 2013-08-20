@@ -109,7 +109,7 @@ namespace :eb do
 
       # write Rakefile for external CI/CD package deployment
       File.open(package_rakefile, "w+") do |f|
-        f.write("spec = Gem::Specification.find_by_name('elastic-beanstalk', '#{Elastic::Beanstalk::VERSION}')\n")
+        f.write("spec = Gem::Specification.find_by_name('elastic-beanstalk', '>= #{Elastic::Beanstalk::VERSION}')\n")
         f.write("load \"\#{spec.gem_dir}/lib/elastic/beanstalk/tasks/eb.rake\"")
       end
 
@@ -133,8 +133,10 @@ namespace :eb do
     # ensure credentials
     credentials!
 
+    package = resolve_absolute_package_file
+
     # check package file
-    raise "Package file not found (#{absolute_package_file}).  Be sure to run the :package task subsequent to any :deploy attempts." if !File.exists? absolute_package_file
+    raise "Package file not found #{package} (also checked current dir).  Be sure to run the :package task subsequent to any :deploy attempts." if !File.exists? package
 
     # Don't deploy to test or cucumber (or whatever is specified by :disallow_environments)
     raise "#{EbConfig.environment} is one of the #{EbConfig.disallow_environments} disallowed environments.  Configure it by changing the :disallow_environments in the eb.yml" if EbConfig.disallow_environments.include? EbConfig.environment
@@ -156,7 +158,7 @@ namespace :eb do
         solution_stack_name: EbConfig.solution_stack_name,
         settings: EbConfig.option_settings,
         strategy: EbConfig.strategy.to_sym,
-        package: absolute_package_file
+        package: package
     }
 
     unless EbConfig.smoke_test.nil?
@@ -252,8 +254,22 @@ namespace :eb do
     EbConfig.package[:verbose] || false
   end
 
+  def resolve_absolute_package_file
+
+    # first see if it is in the current dir, i.e. CI environment where the generated rakefile and pkg is dropped in the same place
+    file = EbConfig.resolve_path(package_file_name)
+    return file if File.exists? file
+
+    file = EbConfig.resolve_path(package_file)
+    return file
+  end
+
   def package_file
-    "#{EbConfig.package[:dir]}/#{EbConfig.app}.zip"
+    "#{EbConfig.package[:dir]}/#{package_file_name}"
+  end
+
+  def package_file_name
+    "#{EbConfig.app}.zip"
   end
 
   def package_rakefile
@@ -262,14 +278,5 @@ namespace :eb do
 
   def aws_secrets_file
     File.expand_path("~/.aws.#{EbConfig.app}.yml")
-  end
-
-  def absolute_package_file
-    filename = package_file()
-    unless filename.start_with? '/'
-      filename = filename.gsub('[', '').gsub(']', '')
-      filename = EbConfig.resolve_path(filename)
-    end
-    filename
   end
 end

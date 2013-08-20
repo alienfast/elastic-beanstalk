@@ -164,18 +164,12 @@ module Elastic
       end
 
       def resolve_path(relative_path)
-        if defined?(Rails)
 
-          #puts '**********************Using Rails.root'
+        if defined?(Rails)
           Rails.root.join(relative_path)
         elsif defined?(Rake.original_dir)
-
-          #puts '**********************Using Rake.original_dir'
           Rake.original_dir.join(relative_path)
         else
-
-          #puts '**********************Using Last resort Dir.pwd'
-          #raise 'I have no idea what the root dir is yet.'
           File.expand_path(relative_path, Dir.pwd)
         end
       end
