@@ -19,8 +19,12 @@ namespace :eb do
     #env = ENV['RAILS_ENV'] || Rails.env || 'development'
     env = ENV['RAILS_ENV'] || 'development'
 
-    # load the configuration
-    EbConfig.load!(env)
+    # load the configuration from same dir (for standalone CI purposes) or from the rails config dir if within the rails project
+    filename = EbConfig.resolve_path('eb.yml')
+    unless File.exists? filename
+      filename = EbConfig.resolve_path('config/eb.yml')
+    end
+    EbConfig.load!(env, filename)
 
     # Let's be explicit regardless of 'production' being the eb's default shall we? Set RACK_ENV and RAILS_ENV based on the given environment
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', "#{EbConfig.environment}")

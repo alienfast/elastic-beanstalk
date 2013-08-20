@@ -168,7 +168,7 @@ module Elastic
         if defined?(Rails)
           Rails.root.join(relative_path)
         elsif defined?(Rake.original_dir)
-          Rake.original_dir.join(relative_path)
+          File.expand_path(relative_path, Rake.original_dir)
         else
           File.expand_path(relative_path, Dir.pwd)
         end
