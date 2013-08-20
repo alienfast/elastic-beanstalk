@@ -36,8 +36,6 @@ $LOAD_PATH.unshift gem_dir# Look in gem directory for resources first.
 lib = File.expand_path('lib', gem_dir)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-
-#require 'elastic-beanstalk'
 require 'elastic/beanstalk'
 require 'rake'
 require 'pp'
