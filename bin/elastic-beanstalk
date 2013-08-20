@@ -27,9 +27,13 @@
 #   elastic-beanstalk some-task
 #   elastic-beanstalk some-task[args]
 #
+
+gem 'elastic-beanstalk'
+
 gem_dir = File.expand_path('..',File.dirname(__FILE__))
 $LOAD_PATH.unshift gem_dir# Look in gem directory for resources first.
 
+require 'elastic-beanstalk'
 require 'rake'
 require 'pp'
 
