@@ -202,9 +202,10 @@ namespace :eb do
 
     # try to grab from task argument first
     version = args[:version]
-    if version.nil? && File.exists?(absolute_package_file)
+    file = resolve_absolute_package_file
+    if version.nil? && File.exists?(file)
       # otherwise use the MD5 hash of the package file
-      version = Digest::MD5.file(absolute_package_file).hexdigest
+      version = Digest::MD5.file(file).hexdigest
     end
 
     # set the var, depending on the sequence of calls, this may be nil
