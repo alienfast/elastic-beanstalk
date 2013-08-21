@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+require 'rake'
+require 'bundler'
+require 'pp'
+
+raise "Bundler is required.  Please install bundler with 'gem install bundler'" unless defined?(Bundler)
+
 #
 # Example:
 #
@@ -8,13 +14,63 @@
 #
 gem_dir = File.expand_path('..',File.dirname(__FILE__))
 
-require 'rake'
-
+# init dependencies
 pwd=Dir.pwd
-Dir.chdir("#{gem_dir}/bin") # We'll load rakefile from the gem's bin dir.
+Dir.chdir("#{gem_dir}")
+Bundler.require
+Dir.chdir(pwd) # Revert to original pwd
+
+
+
+# init rake
+#pwd=Dir.pwd
+#Dir.chdir("#{gem_dir}/bin") # We'll load rakefile from the gem's bin dir.
 Rake.application.init
-Rake.application.load_rakefile
-Dir.chdir(pwd) # Revert to original pwd for any path args passed to task.
+#Dir.chdir(pwd) # Revert to original pwd for any path args passed to task.
+
+
+
+
+
+#Bundler.require
+
+#Bundler::GemHelper.gemspec
+#Bundler.setup ?????
+#gem 'elastic-beanstalk'
+#gem 'elastic-beanstalk', :path => '~/alienfast/elastic-beanstalk'
+
+
+
+#gem_helper = Bundler::GemHelper.new( gem_dir )
+#pp gem_helper.gemspec.dependencies
+#
+#gem_helper.gemspec.dependencies.each do |dep|
+#  #gem dep.name, *(dep.requirement.as_list + [:type => :runtime])
+#
+#  pp dep
+#
+#  #gem dep.name, *(dep.requirement.as_list + [:type => :development])
+#  #puts "gem #{dep.name}, *(#{dep.requirement.as_list + [:type => :runtime]})"
+#
+#  #puts "gem #{dep.name}, *(#{dep.requirement.as_list + [:group => :runtime]})"
+#  #gem dep.name, *(dep.requirement.as_list + [:group => :development])
+#  gem dep.name, dep.requirement.as_list
+#
+#end
+
+
+#include Bundler:Dsl
+#include Bundler::Dsl
+#autoload :Dsl,                   'bundler/dsl'
+#require 'rake/dsl_definition'
+#gemspec
+
+
+# load the rake tasks
+load "#{gem_dir}/lib/elastic/beanstalk/tasks/eb.rake"
+
+
+
 
 
 Rake.application.invoke_task(ARGV[0])
