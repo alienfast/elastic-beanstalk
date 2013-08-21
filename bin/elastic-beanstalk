@@ -1,49 +1,20 @@
 #!/usr/bin/env ruby
-#$:.unshift(File.dirname(__FILE__) + '/../lib') unless $:.include?(File.dirname(__FILE__) + '/../lib')
-#
-#require 'rubygems'
-#require 'rake'
-#task=ARGV[0]
-#spec = Gem::Specification.find_by_name('elastic-beanstalk')
-#gem_dir = spec.gem_dir
-#puts gem_dir
-#
-#
-## testing only
-#gem_dir = "/Users/kross/alienfast/elastic-beanstalk"
-#puts gem_dir
-#
-#
-#Dir["#{gem_dir}/lib/elastic/beanstalk/tasks/*.rake"].each do |file|
-#  puts file and Rake::load_rakefile(file)
-#end
-#Rake::Task.clear # Avoid tasks being loaded several times in dev mode
-#Rake::Task[task].reenable # Support re-execution of a task.
-#Rake::Task[task].invoke
 
 #
 # Example:
 #
-#   elastic-beanstalk some-task
-#   elastic-beanstalk some-task[args]
+#   elastic-beanstalk eb:show_config
+#   elastic-beanstalk eb:show_config[1.1.1]
 #
-
-#gem 'elastic-beanstalk'
-
 gem_dir = File.expand_path('..',File.dirname(__FILE__))
-$LOAD_PATH.unshift gem_dir# Look in gem directory for resources first.
 
-lib = File.expand_path('lib', gem_dir)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
-require 'elastic/beanstalk'
 require 'rake'
-require 'pp'
 
 pwd=Dir.pwd
 Dir.chdir("#{gem_dir}/bin") # We'll load rakefile from the gem's bin dir.
 Rake.application.init
 Rake.application.load_rakefile
 Dir.chdir(pwd) # Revert to original pwd for any path args passed to task.
+
 
 Rake.application.invoke_task(ARGV[0])

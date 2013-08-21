@@ -221,7 +221,7 @@ namespace :eb do
   def print_config
     # display helpful for figuring out problems later in the deployment logs.
     puts "\n----------------------------------------------------------------------------------"
-    puts "Elastic Beanstalk configuration:"
+    puts 'Elastic Beanstalk configuration:'
     puts "\t:access_key_id: #{credentials['access_key_id']}"
 
     # pretty print things that will be useful to see in the deploy logs and omit clutter that usually doesn't cause us problems.
@@ -252,7 +252,7 @@ namespace :eb do
   # load from a user directory i.e. ~/.aws.acme.yml
   def credentials
     # load secrets from the user home directory
-    @credentials = YAML.safe_load_file(aws_secrets_file) if @credentials.nil?
+    @credentials = YAML::load_file(aws_secrets_file) if @credentials.nil?
     @credentials
   end
 
