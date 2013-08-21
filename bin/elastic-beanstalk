@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
-
 require 'rake'
 require 'bundler'
-require 'pp'
 
 raise "Bundler is required.  Please install bundler with 'gem install bundler'" unless defined?(Bundler)
 
@@ -12,18 +10,15 @@ raise "Bundler is required.  Please install bundler with 'gem install bundler'" 
 #   elastic-beanstalk eb:show_config
 #   elastic-beanstalk eb:show_config[1.1.1]
 #
-gem_dir = File.expand_path('..',File.dirname(__FILE__))
 
 # init dependencies
-#pwd=Dir.pwd
-#Dir.chdir("#{gem_dir}")
 Bundler.setup
-#Dir.chdir(pwd) # Revert to original pwd
 
 # init rake
 Rake.application.init
 
 # load the rake tasks
+gem_dir = File.expand_path('..',File.dirname(__FILE__))
 load "#{gem_dir}/lib/elastic/beanstalk/tasks/eb.rake"
 
 # invoke the given task
