@@ -3,8 +3,7 @@ require 'zipruby' # gem 'zipruby'
 require 'ap' # gem 'awesome_print'
 require 'eb_deployer'
 require 'time_diff'
-require 'elastic/beanstalk/config'
-require 'elastic/beanstalk/extensions'
+require 'elastic/beanstalk'
 require 'yaml'
 
 namespace :eb do
