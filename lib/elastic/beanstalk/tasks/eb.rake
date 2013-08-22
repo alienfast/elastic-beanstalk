@@ -34,7 +34,7 @@ namespace :eb do
     resolve_version(args)
 
     # configure aws credentials.  Depending on the called task, this may not be necessary parent task should call #credentials! for validation.
-    AWS.config(credentials) unless @credentials.nil?
+    AWS.config(credentials) unless credentials.nil?
 
     # configure aws region if specified in the eb.yml
     AWS.config(region: EbConfig.region) unless EbConfig.region.nil?
