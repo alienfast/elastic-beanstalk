@@ -5,8 +5,64 @@ require 'eb_deployer'
 require 'time_diff'
 require 'elastic/beanstalk'
 require 'yaml'
+require 'table_print'
 
 namespace :eb do
+
+  namespace :rds do
+
+    desc 'List snapshots'
+    task :snapshots => [:config] do |t, args|
+      # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
+      tp rds.snapshots.to_a, :id,
+                              :status,
+                              {gb: {display_method: :allocated_storage}},
+                              {type: {display_method: :snapshot_type}},
+                              {engine: lambda{|i| "#{i.engine} #{i.engine_version}"}},
+                              {zone: {display_method: :availability_zone_name}},
+                              :created_at,
+                              :instance_create_time
+                              #:master_username,
+    end
+
+    desc 'List instances'
+    task :instances => [:config] do |t, args|
+      # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
+      tp rds.instances.to_a, :id,
+                              {name: {display_method: :db_name}},
+                              :status,
+                              {gb: {display_method: :allocated_storage}},
+                              :iops,
+                              {class: {display_method: :db_instance_class}},
+                              {engine: lambda{|i| "#{i.engine} #{i.engine_version}"}},
+                              {zone: {display_method: :availability_zone_name}},
+                              :multi_az,
+                              #{endpoint_address: {max_width: 120}},
+                              {:endpoint_address => {:width => 120}},
+                              {port: {display_method: :endpoint_port}},
+                              #:latest_restorable_time,
+                              #:auto_minor_version_upgrade,
+                              #:read_replica_db_instance_identifiers,
+                              #:read_replica_source_db_instance_identifier,
+                              #:backup_retention_period,
+                              #:master_username,
+                              :created_at
+
+
+    end
+
+    #task :create_snapshot => [:config] do |t, args|
+    #  #r = AWS::RDS::Base.new
+    #
+    #end
+
+
+    def rds
+      @rds ||= AWS::RDS.new
+      @rds
+    end
+  end
+
 
   ###########################################
   #
