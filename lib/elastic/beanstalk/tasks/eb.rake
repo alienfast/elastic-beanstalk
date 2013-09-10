@@ -248,7 +248,7 @@ namespace :eb do
     end
   end
 
-  # load from a user directory i.e. ~/.aws.acme.yml
+  # load from a user directory i.e. ~/.aws/acme.yml
   def credentials
     # load secrets from the user home directory
     @credentials = YAML::load_file(aws_secrets_file) if @credentials.nil?
@@ -282,6 +282,6 @@ namespace :eb do
   end
 
   def aws_secrets_file
-    File.expand_path("~/.aws.#{EbConfig.app}.yml")
+    File.expand_path("~/.aws/#{EbConfig.app}.yml")
   end
 end

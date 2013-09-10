@@ -37,7 +37,7 @@ Since [eb_deployer](https://github.com/ThoughtWorksStudios/eb_deployer) is doing
 
 Given an application named 'acme':
 
-### Step 1: Add a ~/.aws.acme.yml
+### Step 1: Add a ~/.aws/acme.yml
 This should contain the access and secret keys generated from the selected IAM user.  This is the only file that will need to reside outside the repository.
 
     access_key_id: XXXXXX
