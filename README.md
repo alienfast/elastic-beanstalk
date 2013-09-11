@@ -78,10 +78,10 @@ This will take a while.  We intend to provide an example in the wiki and/or samp
     rake eb:package                 # Package zip source bundle for Elastic Beanstalk
     rake eb:show_config[version]    # Show resolved configuration without doing anything
 
-## RDS Rake Tasks
+## EB:RDS Rake Tasks
 
-RDS tasks are intended to make integration of RDS task into the deployment process simple.
-i.e. create a snapshot before or after an `eb:deploy`, the following `rake` tasks exist:
+The EB:RDS tasks are intended to make integration of RDS tasks into the deployment process simple.
+i.e. create a snapshot before or after an `eb:deploy`.  The following rake tasks exist:
 
     rake eb:rds:create_snapshot[instance_id,snapshot_id]   # Creates an RDS snapshot
     rake eb:rds:instances                                  # List RDS instances

@@ -11,7 +11,7 @@ require 'timeout'
 namespace :eb do
 
   namespace :rds do
-
+    # http://docs.aws.amazon.com/AWSRubySDK/latest/frames.html
     desc 'List RDS snapshots'
     task :snapshots => [:config] do |t, args|
       # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
