@@ -33,7 +33,6 @@ namespace :eb do
 
       from_time = Time.now
       puts "\n\n---------------------------------------------------------------------------------------------------------------------------------------"
-      puts "Creating snapshot[#{snapshot_id}]:\n\n"
       snapshot = db.create_snapshot(snapshot_id)
       #snapshot = snapshot(snapshot_id) # for quick testing of code below
 
@@ -50,48 +49,23 @@ namespace :eb do
       begin
         Timeout.timeout(timeout) do
           i = 0
-          #show_wait_spinner {
+
+          print "\nCreating snapshot[#{snapshot_id}]..."
+          Spinner.show {
             begin
               sleep sleep_wait.to_i unless (i == 0)
               i += 1
-              #begin
-              snapshot = snapshot(snapshot_id)
-              #rescue => e
-              #  response = ResponseStub.new({code: e.message, body: ''})
-              #end
-              putc('.')
 
-              #puts "\t\t[#{response.code}]"
-              #puts "\t#{response.body}"
+              snapshot = snapshot(snapshot_id)
+
             end until (snapshot.status.eql? 'available')
-          #}
+          }
         end
       ensure
-        #puts "\nFinal response: \n\tcode: [#{response.code}] \n\texpectation met: #{response.body.include?(expected_text)}"
-        puts "\n\n---------------------------------------------------------------------------------------------------------------------------------------"
-        puts "Snapshot[#{snapshot_id}]: #{snapshot.status}. Finished in #{Time.diff(from_time, Time.now, '%N %S')[:diff]}.\n"
-        #print_snapshots(snapshot(snapshot_id))
-        #puts "---------------------------------------------------------------------------------------------------------------------------------------\n\n"
-
+        puts "\n\nSnapshot[#{snapshot_id}]: #{snapshot.status}. Finished in #{Time.diff(from_time, Time.now, '%N %S')[:diff]}.\n"
+        puts "---------------------------------------------------------------------------------------------------------------------------------------\n\n"
       end
     end
-
-    #def show_wait_spinner(fps=10)
-    #  chars = %w[| / - \\]
-    #  delay = 1.0/fps
-    #  iter = 0
-    #  spinner = Thread.new do
-    #    while iter do # Keep spinning until told otherwise
-    #      print chars[(iter+=1) % chars.length]
-    #      sleep delay
-    #      print "\b"
-    #    end
-    #  end
-    #  yield.tap {# After yielding to the block, save the return value
-    #    iter = false # Tell the thread to exit, cleaning up after itself…
-    #    spinner.join # …and wait for it to do so.
-    #  } # Use the block's return value as the method's
-    #end
 
     def snapshot(snapshot_id)
       AWS::RDS::DBSnapshot.new(snapshot_id)

@@ -69,7 +69,7 @@ The default is the 'development' environment, change this via command line by pr
 ### Step 4. Get some coffee
 This will take a while.  We intend to provide an example in the wiki and/or samples dir that implements a [caching strategy detailed here](http://horewi.cz/faster-rails-3-deployments-to-aws-elastic-beanstalk.html) to speed up deployment.
 
-## Rake Tasks
+## EB Rake Tasks
 
     rake eb:clobber                 # Remove any generated package
     rake eb:config                  # Setup AWS.config and merge/override environments into one resolved configuration
@@ -77,6 +77,19 @@ This will take a while.  We intend to provide an example in the wiki and/or samp
     rake eb:destroy[force]          # ** Warning: Destroy Elastic Beanstalk application and *all* environments
     rake eb:package                 # Package zip source bundle for Elastic Beanstalk
     rake eb:show_config[version]    # Show resolved configuration without doing anything
+
+## RDS Rake Tasks
+
+RDS tasks are intended to make integration of RDS task into the deployment process simple.
+i.e. create a snapshot before or after an `eb:deploy`, the following `rake` tasks exist:
+
+    rake eb:rds:create_snapshot[instance_id,snapshot_id]   # Creates an RDS snapshot
+    rake eb:rds:instances                                  # List RDS instances
+    rake eb:rds:snapshots                                  # List RDS snapshots
+
+For example, this would create a snapshot prior to the deployment (and migration) to version 1.1.0:
+
+    rake eb:rds:create_snapshot[acme, pre-1.1.0] eb:deploy[1.1.0]
 
 ## A real-world example
 

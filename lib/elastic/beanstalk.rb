@@ -6,9 +6,11 @@ module Elastic
     require 'elastic/beanstalk/extensions'
     require 'elastic/beanstalk/smoke_tester'
     require 'elastic/beanstalk/version'
+    require 'elastic/beanstalk/spinner'
   end
 end
 
 EbConfig = Elastic::Beanstalk::Config
 EbExtensions = Elastic::Beanstalk::Extensions
 EbSmokeTester = Elastic::Beanstalk::SmokeTester
+Spinner = Elastic::Beanstalk::Spinner
