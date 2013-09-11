@@ -6,60 +6,142 @@ require 'time_diff'
 require 'elastic/beanstalk'
 require 'yaml'
 require 'table_print'
+require 'timeout'
 
 namespace :eb do
 
   namespace :rds do
 
-    desc 'List snapshots'
+    desc 'List RDS snapshots'
     task :snapshots => [:config] do |t, args|
       # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
-      tp rds.snapshots.to_a, :id,
-                              :status,
-                              {gb: {display_method: :allocated_storage}},
-                              {type: {display_method: :snapshot_type}},
-                              {engine: lambda{|i| "#{i.engine} #{i.engine_version}"}},
-                              {zone: {display_method: :availability_zone_name}},
-                              :created_at,
-                              :instance_create_time
-                              #:master_username,
+      print_snapshots(rds.snapshots.to_a)
     end
 
-    desc 'List instances'
+    desc 'List RDS instances'
     task :instances => [:config] do |t, args|
       # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
-      tp rds.instances.to_a, :id,
-                              {name: {display_method: :db_name}},
-                              :status,
-                              {gb: {display_method: :allocated_storage}},
-                              :iops,
-                              {class: {display_method: :db_instance_class}},
-                              {engine: lambda{|i| "#{i.engine} #{i.engine_version}"}},
-                              {zone: {display_method: :availability_zone_name}},
-                              :multi_az,
-                              #{endpoint_address: {max_width: 120}},
-                              {:endpoint_address => {:width => 120}},
-                              {port: {display_method: :endpoint_port}},
-                              #:latest_restorable_time,
-                              #:auto_minor_version_upgrade,
-                              #:read_replica_db_instance_identifiers,
-                              #:read_replica_source_db_instance_identifier,
-                              #:backup_retention_period,
-                              #:master_username,
-                              :created_at
-
-
+      print_instances(rds.instances.to_a)
     end
 
-    #task :create_snapshot => [:config] do |t, args|
-    #  #r = AWS::RDS::Base.new
-    #
+    desc 'Creates an RDS snapshot'
+    task :create_snapshot, [:instance_id, :snapshot_id] => [:config] do |t, args|
+
+      snapshot_id = args[:snapshot_id]
+
+      db = db(args[:instance_id])
+
+      from_time = Time.now
+      puts "\n\n---------------------------------------------------------------------------------------------------------------------------------------"
+      puts "Creating snapshot[#{snapshot_id}]:\n\n"
+      snapshot = db.create_snapshot(snapshot_id)
+      #snapshot = snapshot(snapshot_id) # for quick testing of code below
+
+
+      #ID    | STATUS   | GB | TYPE   | ENGINE       | ZONE       | CREATED_AT | INSTANCE_CREATE_TIME
+      #------|----------|----|--------|--------------|------------|------------|------------------------
+      #pre-2 | creating | 10 | manual | mysql 5.6.12 | us-east-1d |            | 2013-09-10 21:37:27
+      #        available
+      print_snapshots(snapshot)
+      puts "\n"
+
+      timeout = 20 * 60
+      sleep_wait = 5
+      begin
+        Timeout.timeout(timeout) do
+          i = 0
+          #show_wait_spinner {
+            begin
+              sleep sleep_wait.to_i unless (i == 0)
+              i += 1
+              #begin
+              snapshot = snapshot(snapshot_id)
+              #rescue => e
+              #  response = ResponseStub.new({code: e.message, body: ''})
+              #end
+              putc('.')
+
+              #puts "\t\t[#{response.code}]"
+              #puts "\t#{response.body}"
+            end until (snapshot.status.eql? 'available')
+          #}
+        end
+      ensure
+        #puts "\nFinal response: \n\tcode: [#{response.code}] \n\texpectation met: #{response.body.include?(expected_text)}"
+        puts "\n\n---------------------------------------------------------------------------------------------------------------------------------------"
+        puts "Snapshot[#{snapshot_id}]: #{snapshot.status}. Finished in #{Time.diff(from_time, Time.now, '%N %S')[:diff]}.\n"
+        #print_snapshots(snapshot(snapshot_id))
+        #puts "---------------------------------------------------------------------------------------------------------------------------------------\n\n"
+
+      end
+    end
+
+    #def show_wait_spinner(fps=10)
+    #  chars = %w[| / - \\]
+    #  delay = 1.0/fps
+    #  iter = 0
+    #  spinner = Thread.new do
+    #    while iter do # Keep spinning until told otherwise
+    #      print chars[(iter+=1) % chars.length]
+    #      sleep delay
+    #      print "\b"
+    #    end
+    #  end
+    #  yield.tap {# After yielding to the block, save the return value
+    #    iter = false # Tell the thread to exit, cleaning up after itself…
+    #    spinner.join # …and wait for it to do so.
+    #  } # Use the block's return value as the method's
     #end
 
+    def snapshot(snapshot_id)
+      AWS::RDS::DBSnapshot.new(snapshot_id)
+    end
+
+    def db(instance_id)
+      db_instance = AWS::RDS::DBInstance.new(instance_id)
+      raise "DB Instance[#{instance_id}] does not exist." unless db_instance.exists?
+      db_instance
+    end
 
     def rds
       @rds ||= AWS::RDS.new
       @rds
+    end
+
+    def print_snapshots(snapshots)
+      tp snapshots,
+         {snapshot_id: {display_method: :id}},
+         :status,
+         {gb: {display_method: :allocated_storage}},
+         {type: {display_method: :snapshot_type}},
+         {engine: lambda { |i| "#{i.engine} #{i.engine_version}" }},
+         {zone: {display_method: :availability_zone_name}},
+         :created_at,
+         :instance_create_time
+      #:master_username,
+    end
+
+    def print_instances(instances)
+      tp instances,
+         {instance_id: {display_method: :id}},
+         {name: {display_method: :db_name}},
+         :status,
+         {gb: {display_method: :allocated_storage}},
+         :iops,
+         {class: {display_method: :db_instance_class}},
+         {engine: lambda { |i| "#{i.engine} #{i.engine_version}" }},
+         {zone: {display_method: :availability_zone_name}},
+         :multi_az,
+         #{endpoint_address: {max_width: 120}},
+         {:endpoint_address => {:width => 120}},
+         {port: {display_method: :endpoint_port}},
+         #:latest_restorable_time,
+         #:auto_minor_version_upgrade,
+         #:read_replica_db_instance_identifiers,
+         #:read_replica_source_db_instance_identifier,
+         #:backup_retention_period,
+         #:master_username,
+         :created_at
     end
   end
 
