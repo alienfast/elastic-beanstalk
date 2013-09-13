@@ -106,7 +106,6 @@ namespace :eb do
          {engine: lambda { |i| "#{i.engine} #{i.engine_version}" }},
          {zone: {display_method: :availability_zone_name}},
          :multi_az,
-         #{endpoint_address: {max_width: 120}},
          {:endpoint_address => {:width => 120}},
          {port: {display_method: :endpoint_port}},
          #:latest_restorable_time,
