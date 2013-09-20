@@ -53,19 +53,21 @@ module Elastic
 
       def received_fatal_error?(response)
         fatal_error = false
-        ['Bundler::PathError'].each do |code|
+        #['Bundler::PathError'].each do |code|
           # fail right away on known terminal cases.
-          if (!response.nil? && response.code.to_i == 500 && response.body.include?(code))
+          #if (!response.nil? && response.code.to_i == 500 && response.body.include?(code))
+        if (!response.nil? && response.code.to_i == 500 && response.body.include?('rror'))
 
             doc = Nokogiri::HTML(response.body)
 
+            # By default, let's grab the info from the Passenger error page...
             $stderr.puts "\t\t[#{response.code}] #{code}"
             $stderr.puts "\t\t\t#{get_content(doc, '//h1')}"
             $stderr.puts "\t\t\t#{get_content(doc, '//dl/dd')}"
             fatal_error = true
-            break
+#            break
           end
-        end
+        #end
 
         fatal_error
       end
