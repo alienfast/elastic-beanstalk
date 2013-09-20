@@ -36,4 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'time_diff'
   spec.add_runtime_dependency 'zipruby'
   spec.add_runtime_dependency 'table_print'
+  spec.add_runtime_dependency 'nokogiri'
 end

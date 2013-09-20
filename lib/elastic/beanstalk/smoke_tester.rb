@@ -1,6 +1,7 @@
 require 'timeout'
 require 'net/http'
 require 'elastic/beanstalk/spinner'
+require 'nokogiri'
 
 module Elastic
   module Beanstalk
@@ -31,8 +32,14 @@ module Elastic
                   response = ResponseStub.new({code: e.message, body: ''})
                 end
 
-                #puts "\t\t[#{response.code}]"
+                puts "\t\t[#{response.code}]"
                 #puts "\t#{response.body}"
+
+                #
+                # Let's try to get out quickly when the deploy has gone wrong.
+                #
+                break if received_fatal_error?(response)
+
               end until (!response.nil? && response.code.to_i == 200 && response.body.include?(expected_text))
             }
           end
@@ -43,6 +50,36 @@ module Elastic
       end
 
       private
+
+      def received_fatal_error?(response)
+        fatal_error = false
+        ['Bundler::PathError'].each do |code|
+          # fail right away on known terminal cases.
+          if (!response.nil? && response.code.to_i == 500 && response.body.include?(code))
+
+            doc = Nokogiri::HTML(response.body)
+
+            $stderr.puts "\t\t[#{response.code}] #{code}"
+            $stderr.puts "\t\t\t#{get_content(doc, '//h1')}"
+            $stderr.puts "\t\t\t#{get_content(doc, '//dl/dd')}"
+            fatal_error = true
+            break
+          end
+        end
+
+        fatal_error
+      end
+
+      def get_content(doc, xpath)
+        value = ''
+        begin
+          element = doc.xpath(xpath)
+          element = element.first unless element.nil?
+          value = element.content unless element.nil?
+        rescue
+        end
+        value
+      end
 
       class ResponseStub
 
