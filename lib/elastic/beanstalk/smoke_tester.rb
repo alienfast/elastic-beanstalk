@@ -61,7 +61,8 @@ module Elastic
             doc = Nokogiri::HTML(response.body)
 
             # By default, let's grab the info from the Passenger error page...
-            $stderr.puts "\t\t[#{response.code}] #{code}"
+            #$stderr.puts "\t\t[#{response.code}] #{code}"
+            $stderr.puts "\t\t[#{response.code}]"
             $stderr.puts "\t\t\t#{get_content(doc, '//h1')}"
             $stderr.puts "\t\t\t#{get_content(doc, '//dl/dd')}"
             fatal_error = true
