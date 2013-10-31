@@ -80,7 +80,7 @@ This will take a while.  We intend to provide an example in the wiki and/or samp
 
 ## EB:RDS Rake Tasks
 
-The EB:RDS tasks are intended to make integration of RDS tasks into the deployment process simple.
+The EB:RDS tasks are intended to make use of RDS tasks simple given existing configuration in the eb.yml.
 i.e. create a snapshot before or after an `eb:deploy`.  The following rake tasks exist:
 
     rake eb:rds:create_snapshot[instance_id,snapshot_id]   # Creates an RDS snapshot
@@ -127,6 +127,47 @@ config/eb.yml
         container_commands:
           01timezone:
             command: "ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime"
+
+      # These are things that make sense for any Ruby application see:
+      #     https://github.com/gkop/elastic-beanstalk-ruby/blob/master/.ebextensions/ruby.config
+      03-ruby.config:
+
+        # Install git in order to be able to bundle gems from git
+        packages:
+          yum:
+            git: []
+        commands:
+          # Run rake with bundle exec to be sure you get the right version
+          add_bundle_exec:
+            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+            cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
+            command: perl -pi -e 's/(rake)/bundle exec $1/' 11_asset_compilation.sh 12_db_migration.sh
+          # Bundle with --deployment as recommended by bundler docs
+          #   cf. http://gembundler.com/v1.2/rationale.html under Deploying Your Application
+          add_deployment_flag:
+            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+            cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
+            command: perl -pi -e 's/(bundle install)/$1 --deployment/' 10_bundle_install.sh
+          # Vendor gems to a persistent directory for speedy subsequent bundling
+          make_vendor_bundle_dir:
+            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+            command: mkdir /var/app/support/vendor_bundle
+          # Store the location of vendored gems in a handy env var
+          set_vendor_bundle_var:
+            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+            cwd: /opt/elasticbeanstalk/support
+            command: sed -i '12iexport EB_CONFIG_APP_VENDOR_BUNDLE=$EB_CONFIG_APP_SUPPORT/vendor_bundle' envvars
+          # The --deployment flag tells bundler to install gems to vendor/bundle/, so
+          # symlink that to the persistent directory
+          symlink_vendor_bundle:
+            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+            cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
+            command: sed -i '6iln -s $EB_CONFIG_APP_VENDOR_BUNDLE ./vendor/bundle' 10_bundle_install.sh
+          # Don't run the above commands again on this instance
+          #   cf. http://stackoverflow.com/a/16846429/283398
+          z_write_post_provisioning_complete_file:
+            cwd: /opt/elasticbeanstalk/support
+            command: touch .post-provisioning-complete
     #---
     options:
       aws:autoscaling:launchconfiguration:
@@ -164,9 +205,8 @@ config/eb.yml
           InstanceType: t1.small
 
 ## Still to come
-1. RDS sample config
-2. Caching sample config
-3. More thorough access to the Elastic Beanstalk api as-needed.
+1. Caching sample config
+2. More thorough access to the Elastic Beanstalk api as-needed.
 
 ## Contributing
 
