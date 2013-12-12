@@ -1,5 +1,5 @@
 require 'digest'
-require 'zipruby' # gem 'zipruby'
+require 'zip'
 require 'ap' # gem 'awesome_print'
 require 'eb_deployer'
 require 'time_diff'
@@ -206,17 +206,17 @@ namespace :eb do
       mkdir_p EbConfig.package[:dir] rescue nil
 
       # zip it up
-      Zip::Archive.open(package_file, Zip::CREATE) do |archive|
+      Zip::File.open(package_file, Zip::File::CREATE) do |archive|
 
         puts "\nCreating archive (#{package_file}):" if package_verbose?
         files.each do |f|
 
           if File.directory?(f)
             puts "\t#{f}" if package_verbose?
-            archive.add_dir(f)
+            archive.add(f, f)
           else
             puts "\t\t#{f}" if package_verbose?
-            archive.add_file(f, f)
+            archive.add(f, f)
           end
         end
       end
