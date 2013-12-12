@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '>= 2.14.1'
 
   # runtime
-  spec.add_runtime_dependency 'railties', '>= 4.0.1'
+  spec.add_runtime_dependency 'railties', '>= 3.2'
   spec.add_runtime_dependency 'eb_deployer'
   spec.add_runtime_dependency 'awesome_print'
   spec.add_runtime_dependency 'time_diff'
