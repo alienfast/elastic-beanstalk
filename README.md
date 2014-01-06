@@ -48,7 +48,8 @@ Something like this should get you started
 
     app: acme
     region: us-east-1
-    solution_stack_name: 64bit Amazon Linux running Ruby 1.9.3
+    # http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/concepts.platforms.html
+    solution_stack_name: 64bit Amazon Linux 2013.09 running Ruby 1.9.3
 
     development:
       strategy: inplace_update
