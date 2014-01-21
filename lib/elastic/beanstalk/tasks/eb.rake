@@ -393,6 +393,10 @@ namespace :eb do
   end
 
   def aws_secrets_file
-    File.expand_path("~/.aws/#{EbConfig.app}.yml")
+    if ENV['ELASTIC_BEANSTALK_CREDENTIALS_DIR'].nil?
+      File.expand_path("~/.aws/#{EbConfig.app}.yml")
+    else
+      File.expand_path("#{ENV['ELASTIC_BEANSTALK_CREDENTIALS_DIR']}/#{EbConfig.app}.yml")
+    end    
   end
 end
