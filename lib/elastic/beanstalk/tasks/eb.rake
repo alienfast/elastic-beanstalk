@@ -271,6 +271,9 @@ namespace :eb do
         environment: EbConfig.environment,
         version_label: version,
         solution_stack_name: EbConfig.solution_stack_name,
+        package_bucket: EbConfig.package_bucket,
+        keep_latest: EbConfig.keep_latest,
+        version_prefix: EbConfig.version_prefix,
         settings: EbConfig.option_settings,
         strategy: EbConfig.strategy.to_sym,
         package: package
