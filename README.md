@@ -207,7 +207,7 @@ config/eb.yml
 
 
 ## Additional options
-    Most of the configurations are defaulted.  The following are less obvious but may be useful:
+Most of the configurations are defaulted.  The following are less obvious but may be useful:
 
     secrets_dir: (default: '~/.aws')
     package:
