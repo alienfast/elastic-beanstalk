@@ -276,6 +276,10 @@ namespace :eb do
         package: package
     }
 
+    options[:package_bucket] = EbConfig.package_bucket unless EbConfig.package_bucket.nil?
+    options[:keep_latest] = EbConfig.keep_latest unless EbConfig.keep_latest.nil?
+    options[:version_prefix] = EbConfig.version_prefix unless EbConfig.version_prefix.nil?
+
     unless EbConfig.smoke_test.nil?
       options[:smoke_test] = eval EbConfig.smoke_test
     end

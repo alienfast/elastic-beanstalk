@@ -1,6 +1,6 @@
 # ElasticBeanstalk
 
-Configure and deploy a rails app to Elastic Beanstalk via rake in 60 seconds.  Maintain multiple environment DRY configurations and .ebextensions in one easy to use configuration file.
+Configure and deploy a rails app to Elastic Beanstalk via rake in 60 seconds.  Maintain multiple environment DRY configurations and .ebextensions in one easy to use yaml configuration file.
 
 This gem simplifies configuration, and passes the heavy lifting to the [eb_deployer](https://github.com/ThoughtWorksStudios/eb_deployer) from ThoughtWorksStudios.
 
@@ -22,9 +22,9 @@ Or install it yourself as:
 
 ### The elastic-beanstalk gem provides:
 * Rake tasks to simplify all interactions
-* Multi-environment configuration inheritance so your configs can be DRY
+* Multi-environment configuration inheritance for DRY yaml configs
+* Keep all configurations including .ebextensions in one yaml file (they are inheritable and can be overridden too)
 * Full access to the range of configuration options provided by AWS Elastic Beanstalk
-* Keep all configurations including .ebextensions in one file (they are inheritable and can be overridden too)
 * Provide access to helpers such as the SmokeTester to simplify configurations
 
 ### Plus
@@ -204,6 +204,22 @@ config/eb.yml
       options:
         aws:autoscaling:launchconfiguration:
           InstanceType: t1.small
+
+
+## Additional options
+    Most of the configurations are defaulted.  The following are less obvious but may be useful:
+
+    secrets_dir: (default: '~/.aws')
+    package:
+      verbose: (default: false)
+      dir: (default: 'pkg')
+
+### eb_deployer additional options
+The following are passed if not nil, otherwise eb_deployer assigns an appropriate default.
+
+    package_bucket:
+    keep_latest:
+    version_prefix:
 
 ## Still to come
 1. Caching sample config
