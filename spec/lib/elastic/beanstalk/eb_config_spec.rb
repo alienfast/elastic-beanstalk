@@ -67,6 +67,7 @@ describe EbConfig do
   def assert_common_top_level_settings
     expect(EbConfig.app).to eql 'acme'
     expect(EbConfig.region).to eql 'us-east-1'
+    expect(EbConfig.secrets_dir).to eql '~/.aws'
     expect(EbConfig.strategy).to eql :blue_green
     expect(EbConfig.solution_stack_name).to eql '64bit Amazon Linux running Ruby 1.9.3'
     expect(EbConfig.disallow_environments).to eql %w(cucumber test)

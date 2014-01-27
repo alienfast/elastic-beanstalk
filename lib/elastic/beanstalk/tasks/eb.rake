@@ -393,6 +393,6 @@ namespace :eb do
   end
 
   def aws_secrets_file
-    File.expand_path("~/.aws/#{EbConfig.app}.yml")
+    File.expand_path("#{EbConfig.secrets_dir}/#{EbConfig.app}.yml")
   end
 end

@@ -21,6 +21,7 @@ module Elastic
         # seed the sensible defaults here
         @configuration = {
             environment: nil,
+            secrets_dir: '~/.aws',
             disallow_environments: %w(cucumber test),
             strategy: :blue_green,
             package: {
