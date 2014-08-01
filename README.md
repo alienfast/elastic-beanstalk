@@ -237,4 +237,4 @@ Please contribute! While this is working great, a greater scope of functionality
 
 ## Copyright
 
-Copyright (c) 2014 AlienFast. See LICENSE.txt for further details.
+Copyright (c) 2014 AlienFast, LLC. See LICENSE.txt for further details.
