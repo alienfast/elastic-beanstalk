@@ -128,7 +128,7 @@ namespace :eb do
 
     # set the default environment to be development
     #env = ENV['RAILS_ENV'] || Rails.env || 'development'
-    env = ENV['RAILS_ENV'] || 'development'
+    env = args[:environment] || ENV['RAILS_ENV'] || 'development'
 
     # load the configuration from same dir (for standalone CI purposes) or from the rails config dir if within the rails project
     filename = EbConfig.resolve_path('eb.yml')
@@ -156,7 +156,7 @@ namespace :eb do
   #
   #
   desc 'Show resolved configuration without doing anything.'
-  task :show_config, [:version] => [:config] do |t, args|
+  task :show_config, [:environment, :version] => [:config] do |t, args|
 
 
     puts "Working Directory: #{Rake.original_dir}"
@@ -240,7 +240,7 @@ namespace :eb do
   #
   #
   desc 'Deploy to Elastic Beanstalk'
-  task :deploy, [:version] => [:config] do |t, args|
+  task :deploy, [:environment, :version] => [:config] do |t, args|
     # Leave off the dependency of :package, we need to package this in the build phase and save
     #   the artifact on bamboo. The deploy plan will handle this separately.
     from_time = Time.now
