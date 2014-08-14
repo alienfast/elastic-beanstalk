@@ -126,27 +126,65 @@ namespace :eb do
   desc 'Setup AWS.config and merge/override environments into one resolved configuration'
   task :config do |t, args|
 
-    # set the default environment to be development
-    #env = ENV['RAILS_ENV'] || Rails.env || 'development'
-    env = args[:environment] || ENV['RAILS_ENV'] || 'development'
+
+    #-------------------------------------------------------------------------------
+    # Resolve arguments in a backwards compatibile way (see https://github.com/alienfast/elastic-beanstalk/issues/12)
+    #   This allows both the use of RAILS_ENV or the :environment parameter
+    #
+    #   Previously, we relied solely on the environment to be passed in as RAILS_ENV.  It is _sometimes_ more convenient to allow it to be passed as the :environment parameter.
+    #   Since :environment is first, and :version used to be first, check the :environment against a version number regex and adjust as necessary.
+    bc_arg_environment = args[:environment]
+    unless /^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)$/.match(bc_arg_environment).nil?
+
+      arg_version = args[:version]
+      raise "Found version[#{bc_arg_environment}] passed as :environment, but also found a value for :version[#{arg_version}].  Please adjust arguments to be [:environment, :version] or use RAILS_ENV with a single [:version] argument" unless arg_version.nil?
+
+      # version was passed as :environment, adjust it.
+      arg_version = bc_arg_environment
+      arg_environment = nil
+
+      # puts "NOTE: Manipulated :environment argument to :version[#{bc_arg_environment}]."
+    else
+      # normal resolution of argements
+      arg_environment = args[:environment]
+      arg_version = args[:version]
+    end
+
+
+    # set the default environment to be development if not otherwise resolved
+    environment = arg_environment || ENV['RAILS_ENV'] || 'development'
 
     # load the configuration from same dir (for standalone CI purposes) or from the rails config dir if within the rails project
     filename = EbConfig.resolve_path('eb.yml')
     unless File.exists? filename
       filename = EbConfig.resolve_path('config/eb.yml')
     end
-    EbConfig.load!(env, filename)
+    EbConfig.load!(environment, filename)
 
     # Let's be explicit regardless of 'production' being the eb's default shall we? Set RACK_ENV and RAILS_ENV based on the given environment
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', "#{EbConfig.environment}")
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RAILS_ENV', "#{EbConfig.environment}")
 
+    #-------------------------------------------------------------------------------
     # resolve the version and set the APP_VERSION environment variable
-    resolve_version(args)
 
+    # try to use from task argument first
+    version = arg_version
+    file = resolve_absolute_package_file
+    if version.nil? && File.exists?(file)
+      # otherwise use the MD5 hash of the package file
+      version = Digest::MD5.file(file).hexdigest
+    end
+
+    # set the var, depending on the sequence of calls, this may be nil
+    #   (i.e. :show_config with no :version argument) so omit it until we have something worthwhile.
+    EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'APP_VERSION', "#{version}") unless version.nil?
+
+    #-------------------------------------------------------------------------------
     # configure aws credentials.  Depending on the called task, this may not be necessary parent task should call #credentials! for validation.
     AWS.config(credentials) unless credentials.nil?
 
+    #-------------------------------------------------------------------------------
     # configure aws region if specified in the eb.yml
     AWS.config(region: EbConfig.region) unless EbConfig.region.nil?
   end
@@ -158,10 +196,7 @@ namespace :eb do
   desc 'Show resolved configuration without doing anything.'
   task :show_config, [:environment, :version] => [:config] do |t, args|
 
-
     puts "Working Directory: #{Rake.original_dir}"
-
-    resolve_version(args)
     print_config
   end
 
@@ -182,8 +217,8 @@ namespace :eb do
   #   root of the archive, not under a top level folder.  Include this package task to make
   #   sure we don't need to learn about this again through long deploy cycles!
   #
-  desc 'Package zip source bundle for Elastic Beanstalk and generate external Rakefile'
-  task :package => [:clobber, :config] do |t, args|
+  desc 'Package zip source bundle for Elastic Beanstalk and generate external Rakefile. (optional) specify the :version arg to make it available to the elastic beanstalk app dynamically via the APP_VERSION environment varable'
+  task :package, [:environment, :version] => [:clobber, :config] do |t, args|
 
     begin
       # write .ebextensions
@@ -241,6 +276,14 @@ namespace :eb do
   #
   desc 'Deploy to Elastic Beanstalk'
   task :deploy, [:environment, :version] => [:config] do |t, args|
+
+    # If called individually, this is not necessary, but if called in succession to eb:package, we may need to re-resolve an MD5 hashed name.
+    #  Since we allow variable use of arguments, it is easiest just to quickly re-enable and re-run the eb:config task since all the resolution
+    #  of values is contained there.
+    Rake::Task['eb:config'].reenable
+    Rake::Task['eb:config'].invoke
+
+
     # Leave off the dependency of :package, we need to package this in the build phase and save
     #   the artifact on bamboo. The deploy plan will handle this separately.
     from_time = Time.now
@@ -256,8 +299,6 @@ namespace :eb do
     # Don't deploy to test or cucumber (or whatever is specified by :disallow_environments)
     raise "#{EbConfig.environment} is one of the #{EbConfig.disallow_environments} disallowed environments.  Configure it by changing the :disallow_environments in the eb.yml" if EbConfig.disallow_environments.include? EbConfig.environment
 
-    # Use the version if given, otherwise use the MD5 hash.  Make available via the eb environment variable
-    version = resolve_version(args)
     print_config
 
     # Avoid known problems
@@ -269,7 +310,7 @@ namespace :eb do
     options = {
         application: EbConfig.app,
         environment: EbConfig.environment,
-        version_label: version,
+        version_label: find_option_app_version,
         solution_stack_name: EbConfig.solution_stack_name,
         settings: EbConfig.option_settings,
         strategy: EbConfig.strategy.to_sym,
@@ -284,7 +325,7 @@ namespace :eb do
       options[:smoke_test] = eval EbConfig.smoke_test
     end
 
-    EbDeployer.deploy(options)
+    # EbDeployer.deploy(options)
 
     puts "\nDeployment finished in #{Time.diff(from_time, Time.now, '%N %S')[:diff]}.\n"
   end
@@ -313,30 +354,20 @@ namespace :eb do
   private
 
   # Use the version if given, otherwise use the MD5 hash.  Make available via the eb APP_VERSION environment variable
-  def resolve_version(args)
+  def find_option_app_version
 
     # if already set by a dependency call to :config, get out early
     version = EbConfig.find_option_setting_value('APP_VERSION')
     return version unless version.nil?
-
-    # try to grab from task argument first
-    version = args[:version]
-    file = resolve_absolute_package_file
-    if version.nil? && File.exists?(file)
-      # otherwise use the MD5 hash of the package file
-      version = Digest::MD5.file(file).hexdigest
-    end
-
-    # set the var, depending on the sequence of calls, this may be nil
-    #   (i.e. :show_config with no :version argument) so omit it until we have something worthwhile.
-    EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'APP_VERSION', "#{version}") unless version.nil?
   end
 
   def print_config
     # display helpful for figuring out problems later in the deployment logs.
     puts "\n----------------------------------------------------------------------------------"
     puts 'Elastic Beanstalk configuration:'
-    puts "\t:access_key_id: #{credentials['access_key_id']}"
+    puts "\taccess_key_id: #{credentials['access_key_id']}"
+    puts "\tenvironment: #{EbConfig.environment}"
+    puts "\tversion: #{find_option_app_version}"
 
     # pretty print things that will be useful to see in the deploy logs and omit clutter that usually doesn't cause us problems.
     h = EbConfig.configuration.dup

@@ -63,7 +63,7 @@ Something like this should get you started
           InstanceType: t1.small
 
 ### Step 3. Package and deploy
-The default is the 'development' environment, change this via command line by prefixing with i.e. RAILS_ENV=production
+The default is the 'development' environment, change this via command line arguments
 
     $ rake eb:package eb:deploy
 
@@ -92,11 +92,42 @@ For example, this would create a snapshot prior to the deployment (and migration
 
     rake eb:rds:create_snapshot[acme, pre-1.1.0] eb:deploy[1.1.0]
 
+## Command line
+
+### RAILS_ENV vs :environment:  
+Some people prefer to use `RAILS_ENV`, others prefer to use the `:environment` argument.  Both are accepted. Depending on the use case, each one can be DRYer than the other. 
+Where the task specifies `[:environment, :version]`, consider the `:environment` optional if you want to use the default of `development` or utilize the `RAILS_ENV` instead.  
+
+**NOTE:** if using the argument `:environment`, you **must** specify it for **both** the `eb:package` and `eb:deploy`, as `eb:package` is responsible for injecting the `RACK_ENV` and `RAILS_ENV` 
+in `aws:elasticbeanstalk:application:environment` section of the `.ebextensions` file.
+     
+### :version 
+If not specified, version will be auto-generated via and MD5 hash of the package file. If specified to the `eb:package` task, the version will be available as the `APP_VERSION` 
+environment variable, specified in the `aws:elasticbeanstalk:application:environment` section of the `.ebextensions` file.  
+
+
 ## A real-world example
 
-Deploy version 1.1.3 of acme to production
+Deploy version 1.1.3 of acme to production using the `:environment` parameter
 
-    $ RAILS_ENV=production rake eb:package eb:deploy[1.1.3]
+    $ rake eb:package[production,1.1.3] eb:deploy[production,1.1.3]
+
+Deploy version 1.1.3 of acme to production using `RAILS_ENV`
+
+    $ RAILS_ENV=production rake eb:package[1.1.3] eb:deploy[1.1.3]
+    
+Deploy an MD5 hashed version of acme to production using the `:environment` parameter
+
+    $ rake eb:package[production] eb:deploy[production]
+
+Deploy an MD5 hashed version of acme to production using `RAILS_ENV`
+
+    $ RAILS_ENV=production rake eb:package eb:deploy
+    
+Deploy an MD5 hashed version of acme to development
+
+    $ rake eb:package eb:deploy
+        
 
 config/eb.yml
 
