@@ -325,7 +325,7 @@ namespace :eb do
       options[:smoke_test] = eval EbConfig.smoke_test
     end
 
-    # EbDeployer.deploy(options)
+    EbDeployer.deploy(options)
 
     puts "\nDeployment finished in #{Time.diff(from_time, Time.now, '%N %S')[:diff]}.\n"
   end
