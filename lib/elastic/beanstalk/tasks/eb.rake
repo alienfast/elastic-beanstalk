@@ -124,8 +124,7 @@ namespace :eb do
   #
   #
   desc 'Setup AWS.config and merge/override environments into one resolved configuration'
-  task :config do |t, args|
-
+  task :config, [:environment, :version] do |t, args|
 
     #-------------------------------------------------------------------------------
     # Resolve arguments in a backwards compatibile way (see https://github.com/alienfast/elastic-beanstalk/issues/12)
@@ -281,7 +280,7 @@ namespace :eb do
     #  Since we allow variable use of arguments, it is easiest just to quickly re-enable and re-run the eb:config task since all the resolution
     #  of values is contained there.
     Rake::Task['eb:config'].reenable
-    Rake::Task['eb:config'].invoke
+    Rake::Task['eb:config'].invoke(*args)
 
 
     # Leave off the dependency of :package, we need to package this in the build phase and save
