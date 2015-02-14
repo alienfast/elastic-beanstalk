@@ -12,13 +12,13 @@ describe EbExtensions do
 
     EbConfig.ebextensions.each_key do |filename|
       filename = EbExtensions.absolute_file_name(filename)
-      expect(File.exists? filename).to be_true
+      expect(File.exists? filename).to be_truthy
     end
 
     EbExtensions.delete_extensions
     EbConfig.ebextensions.each_key do |filename|
       filename = EbExtensions.absolute_file_name(filename)
-      expect(File.exists? filename).to be_false
+      expect(File.exists? filename).to be_falsey
     end
   end
 

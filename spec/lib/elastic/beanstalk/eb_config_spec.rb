@@ -49,14 +49,14 @@ describe EbConfig do
     EbConfig.load!(:development, config_file_path)
     assert_option 'InstanceType', 't1.micro'
     expect(EbConfig.strategy).to eql 'inplace-update'
-    expect(EbConfig.environment).to eql 'development'
+    expect(EbConfig.environment).to eql :development
   end
 
   it 'should read file and override with production environment' do
     EbConfig.clear
     EbConfig.load!(:production, config_file_path)
     assert_option 'InstanceType', 't1.small'
-    expect(EbConfig.environment).to eql 'production'
+    expect(EbConfig.environment).to eql :production
   end
 
   private
@@ -73,7 +73,7 @@ describe EbConfig do
     expect(EbConfig.disallow_environments).to eql %w(cucumber test)
 
     expect(EbConfig.package[:dir]).to eql 'pkg'
-    expect(EbConfig.package[:verbose]).to be_true
+    expect(EbConfig.package[:verbose]).to be_truthy
     expect(EbConfig.package[:includes]).to eql %w(**/* .ebextensions/**/*)
     expect(EbConfig.package[:exclude_files]).to eql %w(resetdb.sh rspec.xml README* db/*.sqlite3)
     expect(EbConfig.package[:exclude_dirs]).to eql %w(pkg tmp log test-reports solr features)

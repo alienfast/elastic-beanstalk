@@ -25,9 +25,9 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   # development
-  s.add_development_dependency 'bundler', '~> 1.3'
+  s.add_development_dependency 'bundler'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec', '>= 2.14.1'
+  s.add_development_dependency 'rspec'
   s.add_development_dependency 'rspec_junit_formatter'
 
   # runtime
