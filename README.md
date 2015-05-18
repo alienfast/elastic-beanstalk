@@ -46,21 +46,23 @@ This should contain the access and secret keys generated from the selected IAM u
 ### Step 2.  Add a config/eb.yml to your rails project
 Something like this should get you started
 
-    app: acme
-    region: us-east-1
-    # http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/concepts.platforms.html
-    solution_stack_name: 64bit Amazon Linux 2013.09 running Ruby 1.9.3
+```ruby
+app: acme
+region: us-east-1
+# http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/concepts.platforms.html
+solution_stack_name: 64bit Amazon Linux 2013.09 running Ruby 1.9.3
 
-    development:
-      strategy: inplace_update
-      options:
-        aws:autoscaling:launchconfiguration:
-          InstanceType: t1.micro
+development:
+  strategy: inplace_update
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: t1.micro
 
-    production:
-      options:
-        aws:autoscaling:launchconfiguration:
-          InstanceType: t1.small
+production:
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: t1.small
+```
 
 ### Step 3. Package and deploy
 The default is the 'development' environment, change this via command line arguments
@@ -131,129 +133,133 @@ Deploy an MD5 hashed version of acme to development
 
 config/eb.yml
 
-    # This is a sample that has not been executed so it may not be exactly 100%, but is intended to show
-    #   that access to full options_settings and .ebextensions is intended.
-    #---
-    app: acme
-    region: us-east-1
-    solution_stack_name: 64bit Amazon Linux running Ruby 1.9.3
-    package:
-      verbose: true
-      exclude_dirs: [solr, features] # additional dirs that merge with default excludes
-      exclude_files: [rspec.xml, README*, db/*.sqlite3]
-    smoke_test: |
-        lambda { |host|
+```ruby
+# This is a sample that has not been executed so it may not be exactly 100%, but is intended to show
+#   that access to full options_settings and .ebextensions is intended.
+#---
+app: acme
+region: us-east-1
+solution_stack_name: 64bit Amazon Linux running Ruby 1.9.3
+package:
+  verbose: true
+  exclude_dirs: [solr, features] # additional dirs that merge with default excludes
+  exclude_files: [rspec.xml, README*, db/*.sqlite3]
+smoke_test: |
+    lambda { |host|
+      EbSmokeTester.test_url("http://#{host}/ping", 600, 5, 'All good! Everything is up and checks out.')
+    }
+#--
+ebextensions:
+  01settings.config:
+    # Run rake tasks before an application deployment
+    container_commands:
+      01seed:
+        command: rake db:seed
+        leader_only: true
+  # run any necessary commands
+  02commands.config:
+    container_commands:
+      01timezone:
+        command: "ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime"
 
-          EbSmokeTester.test_url("http://#{host}/ping", 600, 5, 'All good! Everything is up and checks out.')
-        }
-    #--
-    ebextensions:
-      01settings.config:
-        # Run rake tasks before an application deployment
-        container_commands:
-          01seed:
-            command: rake db:seed
-            leader_only: true
-      # run any necessary commands
-      02commands.config:
-        container_commands:
-          01timezone:
-            command: "ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime"
+  # These are things that make sense for any Ruby application see:
+  #     https://github.com/gkop/elastic-beanstalk-ruby/blob/master/.ebextensions/ruby.config
+  03-ruby.config:
 
-      # These are things that make sense for any Ruby application see:
-      #     https://github.com/gkop/elastic-beanstalk-ruby/blob/master/.ebextensions/ruby.config
-      03-ruby.config:
+    # Install git in order to be able to bundle gems from git
+    packages:
+      yum:
+        git: []
+    commands:
+      # Run rake with bundle exec to be sure you get the right version
+      add_bundle_exec:
+        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+        cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
+        command: perl -pi -e 's/(rake)/bundle exec $1/' 11_asset_compilation.sh 12_db_migration.sh
+      # Bundle with --deployment as recommended by bundler docs
+      #   cf. http://gembundler.com/v1.2/rationale.html under Deploying Your Application
+      add_deployment_flag:
+        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+        cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
+        command: perl -pi -e 's/(bundle install)/$1 --deployment/' 10_bundle_install.sh
+      # Vendor gems to a persistent directory for speedy subsequent bundling
+      make_vendor_bundle_dir:
+        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+        command: mkdir /var/app/support/vendor_bundle
+      # Store the location of vendored gems in a handy env var
+      set_vendor_bundle_var:
+        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+        cwd: /opt/elasticbeanstalk/support
+        command: sed -i '12iexport EB_CONFIG_APP_VENDOR_BUNDLE=$EB_CONFIG_APP_SUPPORT/vendor_bundle' envvars
+      # The --deployment flag tells bundler to install gems to vendor/bundle/, so
+      # symlink that to the persistent directory
+      symlink_vendor_bundle:
+        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
+        cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
+        command: sed -i '6iln -s $EB_CONFIG_APP_VENDOR_BUNDLE ./vendor/bundle' 10_bundle_install.sh
+      # Don't run the above commands again on this instance
+      #   cf. http://stackoverflow.com/a/16846429/283398
+      z_write_post_provisioning_complete_file:
+        cwd: /opt/elasticbeanstalk/support
+        command: touch .post-provisioning-complete
+#---
+options:
+  aws:autoscaling:launchconfiguration:
+    EC2KeyName: eb-ssh
+    SecurityGroups: 'acme-production-control'
 
-        # Install git in order to be able to bundle gems from git
-        packages:
-          yum:
-            git: []
-        commands:
-          # Run rake with bundle exec to be sure you get the right version
-          add_bundle_exec:
-            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-            cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
-            command: perl -pi -e 's/(rake)/bundle exec $1/' 11_asset_compilation.sh 12_db_migration.sh
-          # Bundle with --deployment as recommended by bundler docs
-          #   cf. http://gembundler.com/v1.2/rationale.html under Deploying Your Application
-          add_deployment_flag:
-            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-            cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
-            command: perl -pi -e 's/(bundle install)/$1 --deployment/' 10_bundle_install.sh
-          # Vendor gems to a persistent directory for speedy subsequent bundling
-          make_vendor_bundle_dir:
-            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-            command: mkdir /var/app/support/vendor_bundle
-          # Store the location of vendored gems in a handy env var
-          set_vendor_bundle_var:
-            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-            cwd: /opt/elasticbeanstalk/support
-            command: sed -i '12iexport EB_CONFIG_APP_VENDOR_BUNDLE=$EB_CONFIG_APP_SUPPORT/vendor_bundle' envvars
-          # The --deployment flag tells bundler to install gems to vendor/bundle/, so
-          # symlink that to the persistent directory
-          symlink_vendor_bundle:
-            test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-            cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
-            command: sed -i '6iln -s $EB_CONFIG_APP_VENDOR_BUNDLE ./vendor/bundle' 10_bundle_install.sh
-          # Don't run the above commands again on this instance
-          #   cf. http://stackoverflow.com/a/16846429/283398
-          z_write_post_provisioning_complete_file:
-            cwd: /opt/elasticbeanstalk/support
-            command: touch .post-provisioning-complete
-    #---
-    options:
-      aws:autoscaling:launchconfiguration:
-        EC2KeyName: eb-ssh
-        SecurityGroups: 'acme-production-control'
+  aws:autoscaling:asg:
+    MinSize: 1
+    MaxSize: 5
 
-      aws:autoscaling:asg:
-        MinSize: 1
-        MaxSize: 5
+  aws:elb:loadbalancer:
+    SSLCertificateId: 'arn:aws:iam::XXXXXXX:server-certificate/acme'
+    LoadBalancerHTTPSPort: 443
 
-      aws:elb:loadbalancer:
-        SSLCertificateId: 'arn:aws:iam::XXXXXXX:server-certificate/acme'
-        LoadBalancerHTTPSPort: 443
+  aws:elb:policies:
+    Stickiness Policy: true
 
-      aws:elb:policies:
-        Stickiness Policy: true
+  aws:elasticbeanstalk:sns:topics:
+    Notification Endpoint: 'alerts@acme.com'
 
-      aws:elasticbeanstalk:sns:topics:
-        Notification Endpoint: 'alerts@acme.com'
-
-      aws:elasticbeanstalk:application:
-        Application Healthcheck URL: '/'
-    #---
-    development:
-      strategy: inplace_update
-      options:
-        aws:autoscaling:launchconfiguration:
-          InstanceType: t1.micro
-        aws:elasticbeanstalk:application:environment:
-          RAILS_SKIP_ASSET_COMPILATION: true
-    #---
-    production:
-      options:
-        aws:autoscaling:launchconfiguration:
-          InstanceType: t1.small
-
+  aws:elasticbeanstalk:application:
+    Application Healthcheck URL: '/'
+#---
+development:
+  strategy: inplace_update
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: t1.micro
+    aws:elasticbeanstalk:application:environment:
+      RAILS_SKIP_ASSET_COMPILATION: true
+#---
+production:
+  options:
+    aws:autoscaling:launchconfiguration:
+      InstanceType: t1.small
+```
 
 ## Additional options
 Most of the configurations are defaulted.  The following are less obvious but may be useful:
 
-    secrets_dir: (default: '~/.aws')
-    package:
-      verbose: (default: false)
-      dir: (default: 'pkg')
+```ruby
+secrets_dir: (default: '~/.aws')
+package:
+  verbose: (default: false)
+  dir: (default: 'pkg')
+```
 
 ### eb_deployer additional options
 The following are passed if not nil, otherwise eb_deployer assigns an appropriate default.
 
-    package_bucket:
-    keep_latest:
-    version_prefix:
+```ruby
+package_bucket:
+keep_latest:
+version_prefix:
+```
 
 ## Still to come
-1. Caching sample config
+1. Caching sample config?
 2. More thorough access to the Elastic Beanstalk api as-needed.
 
 ## Contributing
