@@ -15,13 +15,14 @@ namespace :eb do
     desc 'List RDS snapshots'
     task :snapshots => [:config] do |t, args|
       # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
-      print_snapshots(rds.snapshots.to_a)
+      print_snapshots(rds.describe_db_snapshots.db_snapshots)
     end
 
     desc 'List RDS instances'
     task :instances => [:config] do |t, args|
       # absolutely do not run this without specifying columns, otherwise it will call all defined methods including :delete
-      print_instances(rds.instances.to_a)
+
+      print_instances(rds.describe_db_instances.db_instances)
     end
 
     desc 'Creates an RDS snapshot'
@@ -78,21 +79,20 @@ namespace :eb do
     end
 
     def rds
-      @rds ||= AWS::RDS.new
+      @rds ||= Aws::RDS::Client.new(Aws.config)
       @rds
     end
 
     def print_snapshots(snapshots)
       tp snapshots,
-         {snapshot_id: {display_method: :id}},
+         {snapshot_id: {display_method: :db_snapshot_identifier}},
          :status,
          {gb: {display_method: :allocated_storage}},
          {type: {display_method: :snapshot_type}},
          {engine: lambda { |i| "#{i.engine} #{i.engine_version}" }},
-         {zone: {display_method: :availability_zone_name}},
-         :created_at,
+         {zone: {display_method: :availability_zone}},
+         :snapshot_create_time,
          :instance_create_time
-      #:master_username,
     end
 
     def print_instances(instances)
@@ -104,7 +104,7 @@ namespace :eb do
          :iops,
          {class: {display_method: :db_instance_class}},
          {engine: lambda { |i| "#{i.engine} #{i.engine_version}" }},
-         {zone: {display_method: :availability_zone_name}},
+         {zone: {display_method: :availability_zone}},
          :multi_az,
          {:endpoint_address => {:width => 120}},
          {port: {display_method: :endpoint_port}},
