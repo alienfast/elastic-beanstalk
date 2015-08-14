@@ -97,24 +97,24 @@ namespace :eb do
 
     def print_instances(instances)
       tp instances,
-         {instance_id: {display_method: :id}},
+         {instance_id: {display_method: :db_instance_identifier}},
          {name: {display_method: :db_name}},
-         :status,
+         {status: {display_method: :db_instance_status}},
          {gb: {display_method: :allocated_storage}},
          :iops,
          {class: {display_method: :db_instance_class}},
          {engine: lambda { |i| "#{i.engine} #{i.engine_version}" }},
          {zone: {display_method: :availability_zone}},
          :multi_az,
-         {:endpoint_address => {:width => 120}},
-         {port: {display_method: :endpoint_port}},
+         {endpoint: {display_method: lambda { |i| "#{i.endpoint.address}"}, :width => 120}},
+         {port: {display_method: lambda { |i| "#{i.endpoint.port}"}}},
          #:latest_restorable_time,
          #:auto_minor_version_upgrade,
          #:read_replica_db_instance_identifiers,
          #:read_replica_source_db_instance_identifier,
          #:backup_retention_period,
          #:master_username,
-         :created_at
+         {created_at: {display_method: :instance_create_time}}
     end
   end
 
