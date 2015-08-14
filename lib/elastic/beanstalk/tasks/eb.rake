@@ -68,11 +68,11 @@ namespace :eb do
     end
 
     def snapshot(snapshot_id)
-      AWS::RDS::DBSnapshot.new(snapshot_id)
+      Aws::RDS::DBSnapshot.new(snapshot_id)
     end
 
     def db(instance_id)
-      db_instance = AWS::RDS::DBInstance.new(instance_id)
+      db_instance = Aws::RDS::DBInstance.new(instance_id)
       raise "DB Instance[#{instance_id}] does not exist." unless db_instance.exists?
       db_instance
     end
@@ -181,11 +181,16 @@ namespace :eb do
 
     #-------------------------------------------------------------------------------
     # configure aws credentials.  Depending on the called task, this may not be necessary parent task should call #credentials! for validation.
-    AWS.config(credentials) unless credentials.nil?
+    Aws.config.update({
+      credentials: Aws::Credentials.new(credentials['access_key_id'], credentials['secret_access_key']),
+    }) unless credentials.nil?
 
     #-------------------------------------------------------------------------------
     # configure aws region if specified in the eb.yml
-    AWS.config(region: EbConfig.region) unless EbConfig.region.nil?
+    Aws.config.update({
+      region: EbConfig.region,
+    }) unless EbConfig.region.nil?
+
   end
 
   ###########################################
