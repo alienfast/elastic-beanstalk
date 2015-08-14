@@ -181,14 +181,12 @@ namespace :eb do
 
     #-------------------------------------------------------------------------------
     # configure aws credentials.  Depending on the called task, this may not be necessary parent task should call #credentials! for validation.
-
     Aws.config.update({
       credentials: Aws::Credentials.new(credentials['access_key_id'], credentials['secret_access_key']),
     }) unless credentials.nil?
 
     #-------------------------------------------------------------------------------
     # configure aws region if specified in the eb.yml
-
     Aws.config.update({
       region: EbConfig.region,
     }) unless EbConfig.region.nil?
