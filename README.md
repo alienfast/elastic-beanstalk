@@ -72,16 +72,18 @@ The default is the 'development' environment, change this via command line argum
 ### Step 4. Get some coffee
 This will take a while.  We intend to provide an example in the wiki and/or samples dir that implements a [caching strategy detailed here](http://horewi.cz/faster-rails-3-deployments-to-aws-elastic-beanstalk.html) to speed up deployment.
 
-## EB Rake Tasks
+## Rake Tasks
 
-    rake eb:clobber                 # Remove any generated package
-    rake eb:config                  # Setup AWS.config and merge/override environments into one resolved configuration
-    rake eb:deploy[version]         # Deploy to Elastic Beanstalk
-    rake eb:destroy[force]          # ** Warning: Destroy Elastic Beanstalk application and *all* environments
-    rake eb:package                 # Package zip source bundle for Elastic Beanstalk
-    rake eb:show_config[version]    # Show resolved configuration without doing anything
+### EB
 
-## EB:RDS Rake Tasks
+    rake eb:clobber                             # Remove any generated package
+    rake eb:config[environment,version]         # Setup AWS.config and merge/override environments into one resolved configuration
+    rake eb:deploy[environment,version]         # Deploy to Elastic Beanstalk
+    rake eb:destroy[force]                      # ** Warning: Destroy Elastic Beanstalk application and *all* environments
+    rake eb:package[environment,version]        # Package zip source bundle for Elastic Beanstalk
+    rake eb:show_config[environment,version]    # Show resolved configuration without doing anything
+
+### EB:RDS Rake Tasks
 
 The EB:RDS tasks are intended to make use of RDS tasks simple given existing configuration in the eb.yml.
 i.e. create a snapshot before or after an `eb:deploy`.  The following rake tasks exist:
@@ -94,9 +96,7 @@ For example, this would create a snapshot prior to the deployment (and migration
 
     rake eb:rds:create_snapshot[acme, pre-1.1.0] eb:deploy[1.1.0]
 
-## Command line
-
-### RAILS_ENV vs :environment:  
+### Using RAILS_ENV vs :environment:  
 Some people prefer to use `RAILS_ENV`, others prefer to use the `:environment` argument.  Both are accepted. Depending on the use case, each one can be DRYer than the other. 
 Where the task specifies `[:environment, :version]`, consider the `:environment` optional if you want to use the default of `development` or utilize the `RAILS_ENV` instead.  
 
