@@ -256,6 +256,7 @@ The following are passed if not nil, otherwise eb_deployer assigns an appropriat
 package_bucket:
 keep_latest:
 version_prefix:
+tier:
 ```
 
 ## Still to come
