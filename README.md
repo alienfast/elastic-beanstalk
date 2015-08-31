@@ -137,73 +137,54 @@ config/eb.yml
 # This is a sample that has not been executed so it may not be exactly 100%, but is intended to show
 #   that access to full options_settings and .ebextensions is intended.
 #---
+# http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/command-options.html#command-options-ruby
+#
+# This is a sample that has not been executed so it may not be exactly 100%, but is intended to show
+#   that access to full options_settings and .ebextensions is intended.
+#---
 app: acme
 region: us-east-1
-solution_stack_name: 64bit Amazon Linux running Ruby 1.9.3
+# Choose a platform from http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/concepts.platforms.html
+solution_stack_name: 64bit Amazon Linux 2015.03 v2.0.0 running Ruby 2.2 (Passenger Standalone)
+strategy: inplace-update # default to inplace-update to avoid starting new environments
 package:
   verbose: true
-  exclude_dirs: [solr, features] # additional dirs that merge with default excludes
-  exclude_files: [rspec.xml, README*, db/*.sqlite3]
+  exclude_dirs: [features, spec, target, coverage, vcr, flows]  # additional dirs that merge with default excludes
+  exclude_files: [.ruby-*,  rspec.xml, README*, db/*.sqlite3, bower.json]
 smoke_test: |
     lambda { |host|
-      EbSmokeTester.test_url("http://#{host}/ping", 600, 5, 'All good! Everything is up and checks out.')
+      EbSmokeTester.test_url("http://#{host}/health", 600, 5, 'All good! Everything is up and checks out.')
     }
 #--
 ebextensions:
-  01settings.config:
-    # Run rake tasks before an application deployment
-    container_commands:
-      01seed:
-        command: rake db:seed
-        leader_only: true
-  # run any necessary commands
-  02commands.config:
-    container_commands:
+  # General settings for the server environment
+  01-environment.config:
+    commands:
       01timezone:
         command: "ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime"
 
-  # These are things that make sense for any Ruby application see:
-  #     https://github.com/gkop/elastic-beanstalk-ruby/blob/master/.ebextensions/ruby.config
-  03-ruby.config:
-
+  # These are things that make sense for any Ruby application
+  02-ruby.config:
     # Install git in order to be able to bundle gems from git
     packages:
       yum:
         git: []
-    commands:
-      # Run rake with bundle exec to be sure you get the right version
-      add_bundle_exec:
-        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-        cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
-        command: perl -pi -e 's/(rake)/bundle exec $1/' 11_asset_compilation.sh 12_db_migration.sh
-      # Bundle with --deployment as recommended by bundler docs
-      #   cf. http://gembundler.com/v1.2/rationale.html under Deploying Your Application
-      add_deployment_flag:
-        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-        cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
-        command: perl -pi -e 's/(bundle install)/$1 --deployment/' 10_bundle_install.sh
-      # Vendor gems to a persistent directory for speedy subsequent bundling
-      make_vendor_bundle_dir:
-        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-        command: mkdir /var/app/support/vendor_bundle
-      # Store the location of vendored gems in a handy env var
-      set_vendor_bundle_var:
-        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-        cwd: /opt/elasticbeanstalk/support
-        command: sed -i '12iexport EB_CONFIG_APP_VENDOR_BUNDLE=$EB_CONFIG_APP_SUPPORT/vendor_bundle' envvars
-      # The --deployment flag tells bundler to install gems to vendor/bundle/, so
-      # symlink that to the persistent directory
-      symlink_vendor_bundle:
-        test: test ! -f /opt/elasticbeanstalk/support/.post-provisioning-complete
-        cwd: /opt/elasticbeanstalk/hooks/appdeploy/pre
-        command: sed -i '6iln -s $EB_CONFIG_APP_VENDOR_BUNDLE ./vendor/bundle' 10_bundle_install.sh
-      # Don't run the above commands again on this instance
-      #   cf. http://stackoverflow.com/a/16846429/283398
-      z_write_post_provisioning_complete_file:
-        cwd: /opt/elasticbeanstalk/support
-        command: touch .post-provisioning-complete
+        patch: []
+
+  # Run rake tasks before an application deployment
+  03-rake.config:
+    container_commands:
+      01seed:
+        command: rake db:seed
+        leader_only: true
+
 #---
 options:
+
+  # Any environment variables - will be available in ENV
+  aws:elasticbeanstalk:application:environment:
+    FOO: 'bar'
+
   aws:autoscaling:launchconfiguration:
     EC2KeyName: eb-ssh
     SecurityGroups: 'acme-production-control'
@@ -223,10 +204,9 @@ options:
     Notification Endpoint: 'alerts@acme.com'
 
   aws:elasticbeanstalk:application:
-    Application Healthcheck URL: '/'
+    Application Healthcheck URL: '/health'
 #---
 development:
-  strategy: inplace_update
   options:
     aws:autoscaling:launchconfiguration:
       InstanceType: t1.micro
@@ -234,6 +214,7 @@ development:
       RAILS_SKIP_ASSET_COMPILATION: true
 #---
 production:
+  strategy: blue-green # always fire up a new environment and healthcheck before transitioning cname
   options:
     aws:autoscaling:launchconfiguration:
       InstanceType: t1.small
