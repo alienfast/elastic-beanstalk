@@ -49,16 +49,15 @@ Something like this should get you started
 ```ruby
 app: acme
 region: us-east-1
-# http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/concepts.platforms.html
-solution_stack_name: 64bit Amazon Linux 2013.09 running Ruby 1.9.3
-
+solution_stack_name: 64bit Amazon Linux 2015.03 v2.0.0 running Ruby 2.2 (Passenger Standalone)
+strategy: inplace-update 
 development:
-  strategy: inplace_update
   options:
     aws:autoscaling:launchconfiguration:
       InstanceType: t1.micro
 
 production:
+  strategy: blue-green 
   options:
     aws:autoscaling:launchconfiguration:
       InstanceType: t1.small
