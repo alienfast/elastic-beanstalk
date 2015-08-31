@@ -29,9 +29,9 @@ Or install it yourself as:
 
 ### Plus
 Since [eb_deployer](https://github.com/ThoughtWorksStudios/eb_deployer) is doing the heavy lifting, by proxy you get access to great continuous delivery features such as:
-* Blue Green deployment strategy
-* In Place deployment strategy
-* Smoke Testing upon deployment before Blue Green DNS switching
+* `blue-green` deployment strategy
+* `inplace-update` deployment strategy
+* Smoke Testing upon deployment before `blue-green` CNAME switching
 
 ## Usage
 
@@ -69,7 +69,7 @@ The default is the 'development' environment, change this via command line argum
     $ rake eb:package eb:deploy
 
 ### Step 4. Get some coffee
-This will take a while.  We intend to provide an example in the wiki and/or samples dir that implements a [caching strategy detailed here](http://horewi.cz/faster-rails-3-deployments-to-aws-elastic-beanstalk.html) to speed up deployment.
+This will take a while.   TODO: investigate methods to speed up deployment i.e. cache bundle.  Feel free to post yours in the wiki.
 
 ## Rake Tasks
 
@@ -240,8 +240,7 @@ tier:
 ```
 
 ## Still to come
-1. Caching sample config?
-2. More thorough access to the Elastic Beanstalk api as-needed.
+1. Speedier deployments - investigate caching of bundle and asset pre-compilation to see if there is a common setting to be found
 
 ## Contributing
 
@@ -253,6 +252,7 @@ Please contribute! While this is working great, a greater scope of functionality
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-## Copyright
 
-Copyright (c) 2014 AlienFast, LLC. See LICENSE.txt for further details.
+## Copyright and License
+
+Copyright (c) 2014-2015 AlienFast, LLC. MIT License, see LICENSE.txt for further details.
