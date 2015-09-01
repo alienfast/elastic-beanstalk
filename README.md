@@ -51,6 +51,7 @@ app: acme
 region: us-east-1
 solution_stack_name: 64bit Amazon Linux 2015.03 v2.0.0 running Ruby 2.2 (Passenger Standalone)
 strategy: inplace-update 
+keep_latest: 10
 development:
   options:
     aws:autoscaling:launchconfiguration:
@@ -146,6 +147,7 @@ region: us-east-1
 # Choose a platform from http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/concepts.platforms.html
 solution_stack_name: 64bit Amazon Linux 2015.03 v2.0.0 running Ruby 2.2 (Passenger Standalone)
 strategy: inplace-update # default to inplace-update to avoid starting new environments
+keep_latest: 10
 package:
   verbose: true
   exclude_dirs: [features, spec, target, coverage, vcr, flows]  # additional dirs that merge with default excludes
