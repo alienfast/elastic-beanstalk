@@ -384,7 +384,7 @@ namespace :eb do
 
   def destroy
     Rake::Task['eb:config'].invoke
-    EbDeployer.destroy(application: EbConfig.app)
+    EbDeployer.destroy(application: EbConfig.app, environment: EbConfig.environment)
     puts "Destroy issued to AWS."
   end
 
