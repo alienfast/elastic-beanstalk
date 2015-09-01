@@ -236,7 +236,7 @@ The following are passed if not nil, otherwise eb_deployer assigns an appropriat
 
 ```ruby
 package_bucket:
-keep_latest:
+keep_latest:        (if unspecified, it will keep all past versions in the S3 bucket)
 version_prefix:
 tier:
 ```
