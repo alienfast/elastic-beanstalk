@@ -340,12 +340,12 @@ namespace :eb do
   #
   #
   desc '** Warning: Destroy Elastic Beanstalk application and *all* environments.'
-  task :destroy, [:force] do |t, args|
+  task :destroy, [:environment, :force] => [:config] do |t, args|
 
     if args[:force].eql? 'y'
       destroy()
     else
-      puts 'Are you sure you wish to destroy application and *all* environments? (y/n)'
+      puts "Are you sure you wish to destroy #{EbConfig.app}-#{EbConfig.environment}? (y/n)"
       input = STDIN.gets.strip
       if input == 'y'
         destroy()
@@ -385,7 +385,6 @@ namespace :eb do
   def destroy
     Rake::Task['eb:config'].invoke
     EbDeployer.destroy(application: EbConfig.app, environment: EbConfig.environment)
-    puts "Destroy issued to AWS."
   end
 
   # validate file exists
