@@ -1,4 +1,5 @@
 # ElasticBeanstalk
+[![Gem Version](https://badge.fury.io/rb/elastic-beanstalk.svg)](https://rubygems.org/gems/elastic-beanstalk)
 
 Configure and deploy a rails app to Elastic Beanstalk via rake in 60 seconds.  Maintain multiple environment DRY configurations and .ebextensions in one easy to use yaml configuration file.
 
