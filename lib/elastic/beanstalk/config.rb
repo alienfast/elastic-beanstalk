@@ -18,6 +18,10 @@ module Elastic
       # it's a singleton, thus implemented as a self-extended module
       # extend self
 
+      def initialize(options = {})
+        super({interpolation: false}.merge options)
+      end
+
       def seed_default_configuration
         # seed the sensible defaults here
         @configuration = {
