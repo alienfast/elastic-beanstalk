@@ -19,26 +19,28 @@ module Elastic
       # extend self
 
       def initialize(options = {})
-        super({interpolation: false}.merge options)
+        # seed the sensible defaults here
+        options = {
+            symbolize: true,
+            interpolation: false,
+            default_configuration: {
+                environment: nil,
+                secrets_dir: '~/.aws',
+                disallow_environments: %w(cucumber test),
+                strategy: :blue_green,
+                package: {
+                    dir: 'pkg',
+                    verbose: false,
+                    includes: %w(**/* .ebextensions/**/*),
+                    exclude_files: [],
+                    exclude_dirs: %w(pkg tmp log test-reports)
+                },
+                options: {}
+            }
+        }.merge(options)
+        super(options)
       end
 
-      def seed_default_configuration
-        # seed the sensible defaults here
-        @configuration = {
-            environment: nil,
-            secrets_dir: '~/.aws',
-            disallow_environments: %w(cucumber test),
-            strategy: :blue_green,
-            package: {
-                dir: 'pkg',
-                verbose: false,
-                includes: %w(**/* .ebextensions/**/*),
-                exclude_files: [],
-                exclude_dirs: %w(pkg tmp log test-reports)
-            },
-            options: {}
-        }
-      end
 
       def load!(environment = nil, filename = resolve_path('config/eb.yml'))
         super(environment, filename)
@@ -56,7 +58,6 @@ module Elastic
       end
 
       # def options
-      #   @configuration[:options] = {} if @configuration[:options].nil?
       #   @configuration[:options]
       # end
 

@@ -38,5 +38,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rubyzip'
   s.add_runtime_dependency 'table_print'
   s.add_runtime_dependency 'nokogiri'
-  s.add_runtime_dependency 'dry-config', '>=1.1.4'
+  s.add_runtime_dependency 'dry-config', '>=1.2.0'
 end
