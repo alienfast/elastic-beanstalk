@@ -194,6 +194,10 @@ options:
   aws:autoscaling:asg:
     MinSize: 1
     MaxSize: 5
+    # Restrict to Reserved Instance zone: http://stackoverflow.com/a/33131364/2363935
+    'Custom Availability Zones': us-east-1c
+    'Availability Zones': Any 1
+    
 
   aws:elb:loadbalancer:
     SSLCertificateId: 'arn:aws:iam::XXXXXXX:server-certificate/acme'
