@@ -151,6 +151,7 @@ strategy: inplace-update # default to inplace-update to avoid starting new envir
 keep_latest: 10
 package:
   verbose: true
+  includes:  ['public/assets/.sprockets-manifest-*.json'] # ensure '.' manifest is added when using assets:precompile
   exclude_dirs: [features, spec, target, coverage, vcr, flows]  # additional dirs that merge with default excludes
   exclude_files: [.ruby-*,  rspec.xml, README*, db/*.sqlite3, bower.json]
 smoke_test: |
@@ -186,6 +187,7 @@ options:
   # Any environment variables - will be available in ENV
   aws:elasticbeanstalk:application:environment:
     FOO: 'bar'
+    RAILS_SKIP_ASSET_COMPILATION: true # Use if doing asset compilation before packaging (recommended)
 
   aws:autoscaling:launchconfiguration:
     EC2KeyName: eb-ssh
