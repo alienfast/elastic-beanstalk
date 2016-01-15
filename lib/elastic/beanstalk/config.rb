@@ -104,6 +104,9 @@ module Elastic
       end
 
       def to_option_setting(namespace, option_name, value)
+        if value =~ /<%.*ENV.*%>/
+          value = eval(value.scan(/ENV\[.*\]/).first)
+        end
         {
             :'namespace' => "#{namespace}",
             :'option_name' => "#{option_name}",
