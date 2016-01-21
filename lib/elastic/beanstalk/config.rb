@@ -22,7 +22,7 @@ module Elastic
         # seed the sensible defaults here
         options = {
             symbolize: true,
-            interpolation: false,
+            interpolation: true,
             default_configuration: {
                 environment: nil,
                 secrets_dir: '~/.aws',
