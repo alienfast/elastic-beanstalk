@@ -230,7 +230,7 @@ production:
 
 ## ENV interpolation
 
-ENV variable interpolation is provided by [dry-config](https://github.com/alienfast/dry-config/blob/master/README.md#env-interpolationsubstitutionexpansion). 
+ENV variable interpolation is provided by [dry-config](https://github.com/alienfast/dry-config/blob/master/README.md#env-interpolationsubstitutionexpansion).  Any of the values in the `eb.yml` may contain interpolated values. 
 
 The following formats are acceptable:
 
