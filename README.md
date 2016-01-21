@@ -228,6 +228,19 @@ production:
       InstanceType: t1.small
 ```
 
+## ENV interpolation
+
+ENV variable interpolation is provided by [dry-config](https://github.com/alienfast/dry-config/blob/master/README.md#env-interpolationsubstitutionexpansion). 
+
+The following formats are acceptable:
+
+```yaml
+  - ~/foo
+  - $HOME/foo
+  - ${HOME}/foo
+  - #{HOME}/foo
+```
+
 ## Additional options
 Most of the configurations are defaulted.  The following are less obvious but may be useful:
 
