@@ -44,6 +44,18 @@ describe EbConfig do
     expect(EbConfig.environment).to be_nil
   end
 
+  it '#should read file with environment variable interpolation' do
+    EbConfig.clear
+    sleep 1
+    EbConfig.load!(nil, config_file_path)
+    assert_option 'TEST_VAR', ''
+
+    ENV['TEST_VAR'] = 'TEST_VALUE'
+    EbConfig.clear
+    EbConfig.load!(nil, config_file_path)
+    assert_option 'TEST_VAR', 'TEST_VALUE'
+  end
+
   it 'should read file and override with development environment' do
     EbConfig.clear
     EbConfig.load!(:development, config_file_path)
