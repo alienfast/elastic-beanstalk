@@ -57,21 +57,13 @@ module Elastic
         end
       end
 
-      # def options
-      #   @configuration[:options]
-      # end
-
       # custom methods for the specifics of eb.yml settings
       def option_settings
-        result = []
-        options.each_key do |namespace|
-          options[namespace].each do |option_name, value|
-            result << to_option_setting(namespace, option_name, value)
-          end
-        end
+        generate_settings(options)
+      end
 
-        #{"option_settings" => result}
-        result
+      def inactive_settings
+        generate_settings(inactive)
       end
 
       def set_option(namespace, option_name, value)
@@ -87,20 +79,19 @@ module Elastic
       end
 
       def find_option_setting(name)
-        name = name.to_sym
-        options.each_key do |namespace|
-          options[namespace].each do |option_name, value|
-            if option_name.eql? name
-              return to_option_setting(namespace, option_name, value)
-            end
-          end
-        end
-        return nil
+        find_setting(name, options)
       end
 
       def find_option_setting_value(name)
-        o = find_option_setting(name)
-        o[:value] unless o.nil?
+        find_setting_value(name, options)
+      end
+
+      def find_inactive_setting(name)
+        find_setting(name, inactive)
+      end
+
+      def find_inactive_setting_value(name)
+        find_setting_value(name, inactive)
       end
 
       def to_option_setting(namespace, option_name, value)
@@ -109,6 +100,37 @@ module Elastic
             :'option_name' => "#{option_name}",
             :'value' => "#{value}"
         }
+      end
+
+      private
+
+      def find_setting(name, settings_root)
+        name = name.to_sym
+        settings_root.each_key do |namespace|
+          settings_root[namespace].each do |option_name, value|
+            if option_name.eql? name
+              return to_option_setting(namespace, option_name, value)
+            end
+          end
+        end
+        return nil
+      end
+
+      def find_setting_value(name, settings_root)
+        o = find_setting(name, settings_root)
+        o[:value] unless o.nil?
+      end
+
+      def generate_settings(settings_root)
+        result = []
+        settings_root.each_key do |namespace|
+          settings_root[namespace].each do |option_name, value|
+            result << to_option_setting(namespace, option_name, value)
+          end
+        end
+
+        #{"option_settings" => result}
+        result
       end
     end
   end

@@ -213,6 +213,15 @@ options:
 
   aws:elasticbeanstalk:application:
     Application Healthcheck URL: '/health'
+    
+#---
+# Set "inactive_settings" for saving cost on blue green deployment
+#  https://github.com/ThoughtWorksStudios/eb_deployer/wiki/Elastic-Beanstalk-Tips-and-Tricks#set-inactive_settings-for-saving-cost-on-blue-green-deployment    
+inactive:
+  aws:autoscaling:asg:
+    MinSize: 0
+    Cooldown: 900    
+
 #---
 development:
   options:
@@ -255,6 +264,7 @@ package:
 The following are passed if not nil, otherwise eb_deployer assigns an appropriate default.
 
 ```ruby
+inactive_settings:  (nil if unspecified)
 package_bucket:
 keep_latest:        (if unspecified, it will keep all past versions in the S3 bucket)
 version_prefix:

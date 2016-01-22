@@ -42,6 +42,12 @@ options:
 
   aws:elasticbeanstalk:application:
     Application Healthcheck URL: '/healthcheck'
+
+inactive:
+  aws:autoscaling:asg:
+    MinSize: 0
+    Cooldown: 900
+
 #---
 development:
   strategy: inplace-update

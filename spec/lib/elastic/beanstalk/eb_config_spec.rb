@@ -44,7 +44,7 @@ describe EbConfig do
     expect(EbConfig.environment).to be_nil
   end
 
-  it '#should read file with environment variable interpolation' do
+  it 'should read file with environment variable interpolation' do
     EbConfig.clear
     sleep 1
     EbConfig.load!(nil, config_file_path)
@@ -74,6 +74,10 @@ describe EbConfig do
   private
   def assert_option(name, value)
     expect(EbConfig.find_option_setting_value(name)).to eql value
+  end
+
+  def assert_inactive(name, value)
+    expect(EbConfig.find_inactive_setting_value(name)).to eql value
   end
 
   def assert_common_top_level_settings
@@ -108,6 +112,9 @@ describe EbConfig do
     assert_option 'Stickiness Policy', 'true'
     assert_option 'Notification Endpoint', 'alerts@acme.com'
     assert_option 'Application Healthcheck URL', '/healthcheck'
+
+    assert_inactive 'MinSize', '0'
+    assert_inactive 'Cooldown', '900'
   end
 
   def config_file_path

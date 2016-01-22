@@ -316,7 +316,8 @@ namespace :eb do
         environment: EbConfig.environment,
         version_label: find_option_app_version,
         solution_stack_name: EbConfig.solution_stack_name,
-        settings: EbConfig.option_settings,
+        option_settings: EbConfig.option_settings,
+        inactive_settings: EbConfig.inactive_settings,
         strategy: EbConfig.strategy.to_sym,
         package: package
     }
