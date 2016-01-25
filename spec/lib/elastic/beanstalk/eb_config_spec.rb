@@ -7,25 +7,25 @@ describe EbConfig do
   #  puts 'clear'
   #end
 
+  before(:each) do
+     EbConfig.clear
+  end
+
   it '#set_option' do
-    EbConfig.clear
     EbConfig.set_option('aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     expect(EbConfig.options[:'aws:elasticbeanstalk:application:environment'][:'RACK_ENV']).to eq 'staging'
   end
 
   it '#find_option_setting_value' do
-    EbConfig.clear
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     expect(EbConfig.find_option_setting_value('RACK_ENV')).to eql 'staging'
   end
   it '#find_option_setting' do
-    EbConfig.clear
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     expect(EbConfig.find_option_setting('RACK_ENV')).to eql ({:namespace => 'aws:elasticbeanstalk:application:environment', :option_name => 'RACK_ENV', :value => 'staging'})
   end
 
   it '#set_option should allow options to be overridden' do
-    EbConfig.clear
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     assert_option 'RACK_ENV', 'staging'
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'foo')
@@ -33,7 +33,6 @@ describe EbConfig do
   end
 
   it 'should read file with nil environment' do
-    EbConfig.clear
     sleep 1
     #expect(EbConfig.strategy).to be_nil
 
@@ -45,7 +44,6 @@ describe EbConfig do
   end
 
   it 'should read file with environment variable interpolation' do
-    EbConfig.clear
     sleep 1
     EbConfig.load!(nil, config_file_path)
     assert_option 'TEST_VAR', ''
@@ -57,7 +55,6 @@ describe EbConfig do
   end
 
   it 'should read file and override with development environment' do
-    EbConfig.clear
     EbConfig.load!(:development, config_file_path)
     assert_option 'InstanceType', 't1.micro'
     expect(EbConfig.strategy).to eql 'inplace-update'
@@ -65,7 +62,6 @@ describe EbConfig do
   end
 
   it 'should read file and override with production environment' do
-    EbConfig.clear
     EbConfig.load!(:production, config_file_path)
     assert_option 'InstanceType', 't1.small'
     expect(EbConfig.environment).to eql :production
