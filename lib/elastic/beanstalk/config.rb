@@ -22,7 +22,7 @@ module Elastic
         # seed the sensible defaults here
         options = {
             symbolize: true,
-            interpolation: true,
+            interpolation: false,
             default_configuration: {
                 environment: nil,
                 secrets_dir: '~/.aws',
@@ -68,15 +68,12 @@ module Elastic
       end
 
       def set_option(namespace, option_name, value)
-        namespace = namespace.to_sym
+        current_options = to_option_setting(namespace, option_name, value)
+        namespace = current_options[:namespace].to_sym
+        option_name = current_options[:option_name].to_sym
 
-        if options[namespace].nil?
-          options[namespace] = {option_name.to_sym => value}
-        else
-          options[namespace][option_name.to_sym] = value
-        end
-
-        #puts '888888hello'
+        options[namespace] = {} if options[namespace].nil?
+        options[namespace][option_name] = value
       end
 
       def find_option_setting(name)
@@ -96,6 +93,10 @@ module Elastic
       end
 
       def to_option_setting(namespace, option_name, value)
+        erb_value = "#{value}".scan(/<%=.*%>/).first
+        unless erb_value.nil?
+          value = ERB.new(erb_value).result
+        end
         {
             :'namespace' => "#{namespace}",
             :'option_name' => "#{option_name}",
