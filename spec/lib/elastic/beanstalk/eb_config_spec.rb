@@ -7,33 +7,49 @@ describe EbConfig do
   #  puts 'clear'
   #end
 
+  before(:each) do
+     EbConfig.clear
+  end
+
   it '#set_option' do
-    EbConfig.clear
     EbConfig.set_option('aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     expect(EbConfig.options[:'aws:elasticbeanstalk:application:environment'][:'RACK_ENV']).to eq 'staging'
   end
 
   it '#find_option_setting_value' do
-    EbConfig.clear
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     expect(EbConfig.find_option_setting_value('RACK_ENV')).to eql 'staging'
   end
   it '#find_option_setting' do
-    EbConfig.clear
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     expect(EbConfig.find_option_setting('RACK_ENV')).to eql ({:namespace => 'aws:elasticbeanstalk:application:environment', :option_name => 'RACK_ENV', :value => 'staging'})
   end
 
   it '#set_option should allow options to be overridden' do
-    EbConfig.clear
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'staging')
     assert_option 'RACK_ENV', 'staging'
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', 'foo')
     assert_option 'RACK_ENV', 'foo'
   end
 
+  it '#set_option should work with strings or deep symbols' do
+    option_input = [ :'aws:elasticbeanstalk:application:environment', :'RACK_ENV', :TEST_VALUE ]
+    method_order = [:to_sym, :to_s, :to_sym]
+    method_order.each do |current_method|
+      option_input.map!(&current_method)
+      EbConfig.clear
+      EbConfig.set_option(*option_input)
+      assert_option option_input[1].to_s, option_input[2].to_s
+    end
+  end
+
+  it '#set_option should work with environment variable interpolation' do
+    ENV['test_value'] = 'foo'
+    EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'TEST_VAR', '<%= ENV["test_value"] %>')
+    assert_option 'TEST_VAR', 'foo'
+  end
+
   it 'should read file with nil environment' do
-    EbConfig.clear
     sleep 1
     #expect(EbConfig.strategy).to be_nil
 
@@ -44,20 +60,7 @@ describe EbConfig do
     expect(EbConfig.environment).to be_nil
   end
 
-  it 'should read file with environment variable interpolation' do
-    EbConfig.clear
-    sleep 1
-    EbConfig.load!(nil, config_file_path)
-    assert_option 'TEST_VAR', ''
-
-    ENV['TEST_VAR'] = 'TEST_VALUE'
-    EbConfig.clear
-    EbConfig.load!(nil, config_file_path)
-    assert_option 'TEST_VAR', 'TEST_VALUE'
-  end
-
   it 'should read file and override with development environment' do
-    EbConfig.clear
     EbConfig.load!(:development, config_file_path)
     assert_option 'InstanceType', 't1.micro'
     expect(EbConfig.strategy).to eql 'inplace-update'
@@ -65,7 +68,6 @@ describe EbConfig do
   end
 
   it 'should read file and override with production environment' do
-    EbConfig.clear
     EbConfig.load!(:production, config_file_path)
     assert_option 'InstanceType', 't1.small'
     expect(EbConfig.environment).to eql :production
