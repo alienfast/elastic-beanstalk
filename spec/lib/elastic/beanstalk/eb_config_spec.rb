@@ -32,6 +32,17 @@ describe EbConfig do
     assert_option 'RACK_ENV', 'foo'
   end
 
+  it '#set_option should work with strings or deep symbols' do
+    option_input = [ :'aws:elasticbeanstalk:application:environment', :'RACK_ENV', :TEST_VALUE ]
+    method_order = [:to_sym, :to_s, :to_sym]
+    method_order.each do |current_method|
+      option_input.map!(&current_method)
+      EbConfig.clear
+      EbConfig.set_option(*option_input)
+      assert_option option_input[1].to_s, option_input[2].to_s
+    end
+  end
+
   it '#set_option should work with environment variable interpolation' do
     ENV['test_value'] = 'foo'
     EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'TEST_VAR', '<%= ENV["test_value"] %>')
