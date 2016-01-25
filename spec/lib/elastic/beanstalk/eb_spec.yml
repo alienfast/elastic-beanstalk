@@ -19,7 +19,6 @@ ebextensions:
 options:
   aws:elasticbeanstalk:application:environment:
     RAILS_ENV: foobar
-    TEST_VAR: #{TEST_VAR}
 
   aws:autoscaling:launchconfiguration:
     InstanceType: foo

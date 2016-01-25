@@ -32,6 +32,12 @@ describe EbConfig do
     assert_option 'RACK_ENV', 'foo'
   end
 
+  it '#set_option should work with environment variable interpolation' do
+    ENV['test_value'] = 'foo'
+    EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'TEST_VAR', '<%= ENV["test_value"] %>')
+    assert_option 'TEST_VAR', 'foo'
+  end
+
   it 'should read file with nil environment' do
     sleep 1
     #expect(EbConfig.strategy).to be_nil
@@ -41,17 +47,6 @@ describe EbConfig do
     assert_option 'InstanceType', 'foo'
     #expect(EbConfig.strategy).to be_nil
     expect(EbConfig.environment).to be_nil
-  end
-
-  it 'should read file with environment variable interpolation' do
-    sleep 1
-    EbConfig.load!(nil, config_file_path)
-    assert_option 'TEST_VAR', ''
-
-    ENV['TEST_VAR'] = 'TEST_VALUE'
-    EbConfig.clear
-    EbConfig.load!(nil, config_file_path)
-    assert_option 'TEST_VAR', 'TEST_VALUE'
   end
 
   it 'should read file and override with development environment' do
