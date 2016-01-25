@@ -15,6 +15,27 @@ ebextensions:
       01seed:
         command: rake db:seed
         leader_only: true
+
+  05-start-faye-server.config:
+    files:
+      "/opt/elasticbeanstalk/hooks/appdeploy/post/05_start_faye_server.sh":
+        mode: "000755"
+        owner: root
+        group: root
+        content:  |
+          #!/usr/bin/env bash
+          # Loading environment data
+          EB_APP_USER=$(/opt/elasticbeanstalk/bin/get-config container -k app_user)
+          EB_APP_DEPLOY_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k app_deploy_dir)
+          EB_SCRIPT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k script_dir)
+          EB_SUPPORT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k support_dir)
+          # Setting up correct environment and ruby version so that bundle can load all gems
+          . $EB_SUPPORT_DIR/envvars
+          . $EB_SCRIPT_DIR/use-app-ruby.sh
+          # Now we can do the actual restart of the worker. Make sure to have double quotes when using env vars in the command.
+          cd $EB_APP_DEPLOY_DIR
+          su -s /bin/bash -c "RAILS_ENV=production bundle exec thin -C config/private_pub_thin.yml --timeout 60 start -d" $EB_APP_USER
+
 #---
 options:
   aws:elasticbeanstalk:application:environment:

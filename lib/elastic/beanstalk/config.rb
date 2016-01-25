@@ -35,7 +35,8 @@ module Elastic
                     exclude_files: [],
                     exclude_dirs: %w(pkg tmp log test-reports)
                 },
-                options: {}
+                options: {},
+                inactive: {}
             }
         }.merge(options)
         super(options)
