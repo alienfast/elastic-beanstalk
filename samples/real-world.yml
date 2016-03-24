@@ -73,6 +73,18 @@ options:
 
   aws:elasticbeanstalk:application:
     Application Healthcheck URL: '/health'
+    
+#---
+# Set "inactive_settings" for saving cost on blue green deployment
+#  https://github.com/ThoughtWorksStudios/eb_deployer/wiki/Elastic-Beanstalk-Tips-and-Tricks#set-inactive_settings-for-saving-cost-on-blue-green-deployment    
+inactive:
+  aws:autoscaling:asg:
+    MinSize: 0
+    MaxSize: 0
+    Cooldown: 900
+  aws:autoscaling:updatepolicy:rollingupdate:
+    RollingUpdateEnabled: false      
+    
 #---
 development:
   options:
