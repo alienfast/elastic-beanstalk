@@ -220,7 +220,10 @@ options:
 inactive:
   aws:autoscaling:asg:
     MinSize: 0
-    Cooldown: 900    
+    MaxSize: 0
+    Cooldown: 900
+  aws:autoscaling:updatepolicy:rollingupdate:
+    RollingUpdateEnabled: false    
 
 #---
 development:
