@@ -40,6 +40,7 @@ ebextensions:
 options:
   aws:elasticbeanstalk:application:environment:
     RAILS_ENV: foobar
+    RACK_ENV: bizbaz
 
   aws:autoscaling:launchconfiguration:
     InstanceType: foo

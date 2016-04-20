@@ -160,9 +160,13 @@ namespace :eb do
     end
     EbConfig.load!(environment, filename)
 
-    # Let's be explicit regardless of 'production' being the eb's default shall we? Set RACK_ENV and RAILS_ENV based on the given environment
-    EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', "#{EbConfig.environment}")
-    EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RAILS_ENV', "#{EbConfig.environment}")
+    # Set RACK_ENV and RAILS_ENV based on the given environment or the provided configuration
+    unless EbConfig.configuration.dig(:options, :'aws:elasticbeanstalk:application:environment', :RACK_ENV)
+      EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', "#{EbConfig.environment}")
+    end
+    unless EbConfig.configuration.dig(:options, :'aws:elasticbeanstalk:application:environment', :RAILS_ENV)
+      EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RAILS_ENV', "#{EbConfig.environment}")
+    end
 
     #-------------------------------------------------------------------------------
     # resolve the version and set the APP_VERSION environment variable
