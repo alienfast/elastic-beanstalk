@@ -161,10 +161,14 @@ namespace :eb do
     EbConfig.load!(environment, filename)
 
     # Set RACK_ENV and RAILS_ENV based on the given environment or the provided configuration
-    unless EbConfig.configuration.dig(:options, :'aws:elasticbeanstalk:application:environment', :RACK_ENV)
+    unless EbConfig.configuration.fetch(:options, {})
+                                 .fetch(:'aws:elasticbeanstalk:application:environment',{})
+                                 .fetch(:RACK_ENV, nil)
       EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RACK_ENV', "#{EbConfig.environment}")
     end
-    unless EbConfig.configuration.dig(:options, :'aws:elasticbeanstalk:application:environment', :RAILS_ENV)
+    unless EbConfig.configuration.fetch(:options, {})
+                                 .fetch(:'aws:elasticbeanstalk:application:environment',{})
+                                 .fetch(:RAILS_ENV, nil)
       EbConfig.set_option(:'aws:elasticbeanstalk:application:environment', 'RAILS_ENV', "#{EbConfig.environment}")
     end
 

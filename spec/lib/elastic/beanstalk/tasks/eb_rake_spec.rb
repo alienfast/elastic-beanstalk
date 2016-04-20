@@ -23,16 +23,16 @@ describe 'eb namespace rake task' do
     end
 
     it 'should not override the RAILS_ENV in eb.yml' do
-      rails_env = EbConfig.configuration.dig(:options,
-                                             :'aws:elasticbeanstalk:application:environment',
-                                             :RAILS_ENV)
+      rails_env = EbConfig.configuration.fetch(:options, {})
+                                        .fetch(:'aws:elasticbeanstalk:application:environment', {})
+                                        .fetch(:RAILS_ENV, nil)
       expect(rails_env).to eq('foobar')
     end
 
     it 'should not override the RACK_ENV in eb.yml' do
-      rack_env = EbConfig.configuration.dig(:options,
-                                             :'aws:elasticbeanstalk:application:environment',
-                                             :RACK_ENV)
+      rack_env = EbConfig.configuration.fetch(:options, {})
+                                       .fetch(:'aws:elasticbeanstalk:application:environment', {})
+                                       .fetch(:RACK_ENV, nil)
       expect(rack_env).to eq('bizbaz')
     end
   end
