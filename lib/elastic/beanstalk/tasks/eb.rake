@@ -334,6 +334,12 @@ namespace :eb do
     options[:keep_latest] = EbConfig.keep_latest unless EbConfig.keep_latest.nil?
     options[:version_prefix] = EbConfig.version_prefix unless EbConfig.version_prefix.nil?
     options[:tier] = EbConfig.tier unless EbConfig.tier.nil?
+    unless EbConfig.resources.nil?
+      options[:resources] = EbConfig.resources.to_hash
+      # EbDeployer will not query outputs that are symbols, so we have to convert them to strings
+      outputs = options[:resources][:outputs]
+      options[:resources][:outputs] = outputs.inject({}) { |o, (k,v)| o[k.to_s] = v; o } unless outputs.nil?
+    end
     
     unless EbConfig.smoke_test.nil?
       options[:smoke_test] = eval EbConfig.smoke_test
