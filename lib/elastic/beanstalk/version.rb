@@ -1,5 +1,5 @@
 module Elastic
   module Beanstalk
-    VERSION = '1.1.13'
+    VERSION = '1.2.1'
   end
 end
