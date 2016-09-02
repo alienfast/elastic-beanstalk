@@ -327,7 +327,8 @@ namespace :eb do
         option_settings: EbConfig.option_settings,
         inactive_settings: EbConfig.inactive_settings,
         strategy: EbConfig.strategy.to_sym,
-        package: package
+        package: package,
+        tags: EbConfig.tags
     }
 
     options[:package_bucket] = EbConfig.package_bucket unless EbConfig.package_bucket.nil?
